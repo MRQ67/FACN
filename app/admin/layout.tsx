@@ -32,26 +32,26 @@ export default function AdminLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex relative overflow-x-hidden">
+    <div className="min-h-screen bg-brand-base flex relative overflow-x-hidden">
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-dark/60 backdrop-blur-sm z-[60] lg:hidden"
+          className="fixed inset-0 bg-brand-secondary/60 backdrop-blur-sm z-[60] lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
-      <aside className={`fixed inset-y-0 left-0 w-72 bg-dark z-[70] lg:hidden transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 w-72 bg-brand-secondary z-[70] lg:hidden transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-on-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
-              <span className="text-xl font-black text-white tracking-tighter">FCN Admin</span>
+              <span className="text-xl font-black text-on-primary tracking-tighter">FCN Admin</span>
             </div>
-            <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white">
+            <button onClick={() => setIsMobileMenuOpen(false)} className="text-muted hover:text-on-primary">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
@@ -65,8 +65,8 @@ export default function AdminLayout({
               onClick={() => setIsMobileMenuOpen(false)}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
                 pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))
-                  ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-brand-primary text-on-primary shadow-lg shadow-brand-primary/20'
+                  : 'text-muted hover:text-on-primary hover:bg-surface/5'
               }`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,15 +77,15 @@ export default function AdminLayout({
           ))}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/5 space-y-4">
-          <div className="bg-white/5 p-4 rounded-2xl">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Admin Portal</p>
-            <p className="text-sm font-bold text-white truncate">{user.fullName}</p>
-            <p className="text-xs text-primary font-bold mt-1">System Administrator</p>
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border/5 space-y-4">
+          <div className="bg-surface/5 p-4 rounded-2xl">
+            <p className="text-xs font-bold text-muted uppercase tracking-widest mb-2">Admin Portal</p>
+            <p className="text-sm font-bold text-on-primary truncate">{user.fullName}</p>
+            <p className="text-xs text-brand-primary font-bold mt-1">System Administrator</p>
           </div>
           <button
             onClick={() => router.push('/sign-in')}
-            className="w-full flex items-center justify-center space-x-2 py-3 rounded-xl text-red-400 hover:bg-red-500/10 font-bold transition-colors"
+            className="w-full flex items-center justify-center space-x-2 py-3 rounded-xl text-brand-secondary hover:bg-brand-secondary/10 font-bold transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -95,15 +95,15 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      <aside className="hidden lg:flex w-72 bg-dark flex-col sticky top-0 h-screen shrink-0">
+      <aside className="hidden lg:flex w-72 bg-brand-secondary flex-col sticky top-0 h-screen shrink-0">
         <div className="p-8">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-on-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </div>
-            <span className="text-xl font-black text-white tracking-tighter">FCN Admin</span>
+            <span className="text-xl font-black text-on-primary tracking-tighter">FCN Admin</span>
           </div>
         </div>
 
@@ -114,8 +114,8 @@ export default function AdminLayout({
               href={item.href}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
                 pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href))
-                  ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-brand-primary text-on-primary shadow-lg shadow-brand-primary/20'
+                  : 'text-muted hover:text-on-primary hover:bg-surface/5'
               }`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,15 +126,15 @@ export default function AdminLayout({
           ))}
         </nav>
 
-        <div className="p-4 border-t border-white/5 space-y-4">
-          <div className="bg-white/5 p-4 rounded-2xl">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Admin Portal</p>
-            <p className="text-sm font-bold text-white truncate">{user.fullName}</p>
-            <p className="text-xs text-primary font-bold mt-1">System Administrator</p>
+        <div className="p-4 border-t border-border/5 space-y-4">
+          <div className="bg-surface/5 p-4 rounded-2xl">
+            <p className="text-xs font-bold text-muted uppercase tracking-widest mb-2">Admin Portal</p>
+            <p className="text-sm font-bold text-on-primary truncate">{user.fullName}</p>
+            <p className="text-xs text-brand-primary font-bold mt-1">System Administrator</p>
           </div>
           <button
             onClick={() => router.push('/sign-in')}
-            className="w-full flex items-center justify-center space-x-2 py-3 rounded-xl text-red-400 hover:bg-red-500/10 font-bold transition-colors"
+            className="w-full flex items-center justify-center space-x-2 py-3 rounded-xl text-brand-secondary hover:bg-brand-secondary/10 font-bold transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -145,25 +145,25 @@ export default function AdminLayout({
       </aside>
 
       <main className="flex-1 overflow-y-auto h-screen">
-        <header className="bg-white/70 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 h-20 flex items-center px-4 md:px-8 justify-between">
+        <header className="bg-surface/70 backdrop-blur-md sticky top-0 z-50 border-b border-border h-20 flex items-center px-4 md:px-8 justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 -ml-2 text-dark hover:bg-gray-100 rounded-xl lg:hidden transition-colors"
+              className="p-2 -ml-2 text-heading hover:bg-surface rounded-xl lg:hidden transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg>
             </button>
-            <h2 className="text-lg md:text-xl font-black text-dark tracking-tight">
+            <h2 className="text-lg md:text-xl font-black text-heading tracking-tight">
               {navItems.find(n => pathname === n.href || (n.href !== '/admin' && pathname.startsWith(n.href)))?.label || 'Admin'}
             </h2>
           </div>
 
           <div className="flex items-center gap-3 md:gap-6">
-            <Link href="/dashboard" className="hidden sm:block text-sm font-bold text-primary hover:underline">
+            <Link href="/dashboard" className="hidden sm:block text-sm font-bold text-brand-primary hover:underline">
               Go to Portal
             </Link>
-            <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20">
-              <span className="text-primary font-black text-[10px] md:text-xs">
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-brand-primary/20 flex items-center justify-center border border-brand-primary/20">
+              <span className="text-brand-primary font-black text-[10px] md:text-xs">
                 {user.fullName?.split(' ').map((n: string) => n[0]).join('')}
               </span>
             </div>
