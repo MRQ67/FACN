@@ -1,62 +1,60 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F8FAFC;
-  --foreground: #1A1A2E;
-  --primary: #028090;
-  --accent: #02C39A;
-  --dark: #0D1B2A;
-  --glass: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.2);
+  --_base: #e3dad1;
+  --_primary: #e4ad88;
+  --_secondary: #87453e;
+  --_surface: #e3dad1;
+  --_heading: #87453e;
+  --_body: #5c4f4a;
+  --_muted: #8a7a70;
+  --_border: #d5ccc3;
+  --_on-primary: #ffffff;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-accent: var(--accent);
-  --color-dark: var(--dark);
+  --color-brand-base: var(--_base);
+  --color-brand-primary: var(--_primary);
+  --color-brand-secondary: var(--_secondary);
+  --color-surface: var(--_surface);
+  --color-heading: var(--_heading);
+  --color-body: var(--_body);
+  --color-muted: var(--_muted);
+  --color-border: var(--_border);
+  --color-on-primary: var(--_on-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0D1B2A;
-    --foreground: #F8FAFC;
-    --glass: rgba(13, 27, 42, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
-  }
+.dark {
+  --_base: #0a0a0a;
+  --_primary: #ffffff;
+  --_secondary: #ffffff;
+  --_surface: #141414;
+  --_heading: #ffffff;
+  --_body: #ffffff;
+  --_muted: #a0a0a0;
+  --_border: #2a2a2a;
+  --_on-primary: #000000;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--_base);
+  color: var(--_body);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-@layer utilities {
-  .glass-card {
-    background: var(--glass);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px 0 rgba(2, 128, 144, 0.1);
-  }
+.text-gradient {
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-brand-secondary) 100%);
+  -webkit-background-clip: text;
+}
 
-  .mesh-gradient {
-    background-color: #028090;
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(170, 95%, 45%, 1) 0, transparent 50%), 
-      radial-gradient(at 50% 0%, hsla(188, 97%, 29%, 1) 0, transparent 50%), 
-      radial-gradient(at 100% 0%, hsla(168, 97%, 38%, 1) 0, transparent 50%);
-  }
-
-  .text-gradient {
-    background: linear-gradient(135deg, #028090 0%, #02C39A 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+.mesh-gradient {
+  background-color: var(--color-brand-primary);
+  background-image: radial-gradient(at 0 0, var(--color-brand-primary) 0%, transparent 50%),
+    radial-gradient(at 50% 0, var(--color-brand-secondary) 0%, transparent 50%),
+    radial-gradient(at 100% 0, var(--color-brand-primary) 0%, transparent 50%);
 }
 
 .hover-lift {
