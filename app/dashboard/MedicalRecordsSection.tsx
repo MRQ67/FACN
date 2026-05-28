@@ -23,9 +23,9 @@ export default function MedicalRecordsSection() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'CRITICAL': return 'text-red-600 bg-red-50 border-red-100';
-      case 'WARNING': return 'text-amber-600 bg-amber-50 border-amber-100';
-      default: return 'text-emerald-600 bg-emerald-50 border-emerald-100';
+      case 'CRITICAL': return 'text-brand-secondary bg-brand-secondary/10 border-brand-secondary/20';
+      case 'WARNING': return 'text-brand-secondary bg-brand-secondary/10 border-brand-secondary/20';
+      default: return 'text-brand-primary bg-brand-primary/20 border-brand-primary/20';
     }
   };
 
@@ -33,13 +33,13 @@ export default function MedicalRecordsSection() {
     <div className="space-y-6 md:space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
             <div className="space-y-1">
-                <h2 className="text-2xl md:text-3xl font-black text-dark tracking-tight">Medical Records</h2>
-                <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Vital Signs & Remote Monitoring</p>
+                <h2 className="text-2xl md:text-3xl font-black text-heading tracking-tight">Medical Records</h2>
+                <p className="text-muted font-bold uppercase tracking-widest text-[10px]">Vital Signs & Remote Monitoring</p>
             </div>
             {(profile?.role === 'NURSE' || profile?.role === 'RURAL_HO') && (
                 <button 
                     onClick={() => router.push('/vitals/record')}
-                    className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white rounded-2xl font-black shadow-xl shadow-primary/20 hover:scale-105 transition-transform"
+                    className="w-full sm:w-auto px-8 py-3.5 bg-brand-primary text-on-primary rounded-2xl font-black shadow-xl shadow-brand-primary/20 hover:scale-105 transition-transform"
                 >
                     Record New
                 </button>
@@ -47,10 +47,10 @@ export default function MedicalRecordsSection() {
         </div>
 
         {profile?.role !== 'PATIENT' && (
-            <div className="glass-card p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-gray-100">
-                <label className="text-xs font-black uppercase tracking-widest text-gray-500 mb-3 block">Filter by Patient</label>
+            <div className="glass-card p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-border">
+                <label className="text-xs font-black uppercase tracking-widest text-muted mb-3 block">Filter by Patient</label>
                 <select 
-                    className="w-full p-4 bg-white border border-gray-100 rounded-2xl font-bold text-dark focus:ring-2 focus:ring-primary outline-none cursor-pointer shadow-sm text-sm md:text-base"
+                    className="w-full p-4 bg-surface border border-border rounded-2xl font-bold text-heading focus:ring-2 focus:ring-brand-primary outline-none cursor-pointer shadow-sm text-sm md:text-base"
                     value={selectedPatientId}
                     onChange={(e) => setSelectedPatientId(e.target.value)}
                 >
@@ -66,38 +66,38 @@ export default function MedicalRecordsSection() {
           {vitalsQuery === undefined && targetPatientId ? (
              <div className="space-y-4">
                  {[1, 2].map(i => (
-                     <div key={i} className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 animate-pulse">
-                         <div className="flex justify-between mb-6">
-                             <div className="h-4 bg-gray-100 rounded w-1/4"></div>
-                             <div className="h-4 bg-gray-50 rounded w-16"></div>
-                         </div>
-                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                             {[1, 2, 3, 4, 5].map(j => <div key={j} className="h-10 bg-gray-50 rounded-xl"></div>)}
+                     <div key={i} className="bg-surface p-6 md:p-8 rounded-[2rem] border border-border animate-pulse">
+                          <div className="flex justify-between mb-6">
+                              <div className="h-4 bg-surface rounded w-1/4"></div>
+                              <div className="h-4 bg-surface rounded w-16"></div>
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                              {[1, 2, 3, 4, 5].map(j => <div key={j} className="h-10 bg-surface rounded-xl"></div>)}
                          </div>
                      </div>
                  ))}
              </div>
           ) : vitals.length === 0 ? (
-            <div className="bg-white p-12 md:p-20 text-center rounded-[2.5rem] border border-gray-100 shadow-sm">
-                <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <svg className="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+            <div className="bg-surface p-12 md:p-20 text-center rounded-[2.5rem] border border-border shadow-sm">
+                <div className="w-16 h-16 bg-surface rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-8 h-8 text-muted/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                 </div>
-                <h3 className="text-xl font-black text-dark mb-2">No Records Available</h3>
-                <p className="text-gray-400 font-medium text-sm">
+                <h3 className="text-xl font-black text-heading mb-2">No Records Available</h3>
+                <p className="text-muted font-medium text-sm">
                     {selectedPatientId || profile?.role === 'PATIENT' ? 'No vitals history has been recorded yet.' : 'Please select a patient to see their clinical history.'}
                 </p>
             </div>
           ) : (
             vitals.map((record) => (
-              <div key={record.id} className="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:border-primary/20 transition-all">
+              <div key={record.id} className="bg-surface p-6 md:p-8 rounded-[2rem] shadow-sm border border-border hover:border-brand-primary/20 transition-all">
                 <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-8">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{new Date(record.recordedAt).toLocaleDateString()}</span>
-                        <span className="text-gray-200">•</span>
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{new Date(record.recordedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span className="text-[10px] font-black text-muted uppercase tracking-widest">{new Date(record.recordedAt).toLocaleDateString()}</span>
+                        <span className="text-muted/60">•</span>
+                        <span className="text-[10px] font-black text-muted uppercase tracking-widest">{new Date(record.recordedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-600">Recorded by: <span className="text-dark font-black">{record.nurse.user.name}</span></p>
+                    <p className="text-sm font-bold text-muted">Recorded by: <span className="text-heading font-black">{record.nurse.user.name}</span></p>
                   </div>
                   <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border shrink-0 ${getStatusColor(record.triageResult?.overallStatus)}`}>
                     {record.triageResult?.overallStatus || 'NORMAL'}
@@ -112,17 +112,17 @@ export default function MedicalRecordsSection() {
                       { label: 'Temp', value: record.temp, unit: '°C' },
                       { label: 'Glucose', value: record.glucose, unit: 'mg/dL' },
                   ].map((stat, i) => (
-                    <div key={i} className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1">{stat.label}</span>
-                      <span className="text-base md:text-lg font-black text-dark">{stat.value || '--'} <span className="text-[9px] text-gray-400 font-bold">{stat.unit}</span></span>
+                    <div key={i} className="p-4 bg-surface rounded-2xl border border-border">
+                      <span className="text-[9px] font-black text-muted uppercase tracking-widest block mb-1">{stat.label}</span>
+                      <span className="text-base md:text-lg font-black text-heading">{stat.value || '--'} <span className="text-[9px] text-muted font-bold">{stat.unit}</span></span>
                     </div>
                   ))}
                 </div>
 
                 {record.notes && (
-                  <div className="p-5 bg-primary/5 rounded-2xl border border-primary/10">
-                    <span className="text-[10px] text-primary font-black uppercase tracking-widest block mb-2">Clinical Observations</span>
-                    <p className="text-xs md:text-sm text-gray-700 font-medium leading-relaxed">{record.notes}</p>
+                  <div className="p-5 bg-brand-primary/5 rounded-2xl border border-brand-primary/10">
+                    <span className="text-[10px] text-brand-primary font-black uppercase tracking-widest block mb-2">Clinical Observations</span>
+                    <p className="text-xs md:text-sm text-muted font-medium leading-relaxed">{record.notes}</p>
                   </div>
                 )}
               </div>

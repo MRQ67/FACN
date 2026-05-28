@@ -47,21 +47,21 @@ export default function PublicDoctorAvailabilityPage() {
   ) as Hospital[];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+    <div className="min-h-screen bg-brand-base">
+      <nav className="sticky top-0 z-50 bg-surface/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => router.push('/')}>
-            <div className="w-10 h-10 bg-[#0D1B2A] rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-[#028090]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-10 h-10 bg-brand-secondary rounded-xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
             </div>
-            <span className="text-xl font-black text-[#0D1B2A] tracking-tight">FCN</span>
+            <span className="text-xl font-black text-heading tracking-tight">FCN</span>
           </div>
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push('/login')}
-              className="px-6 py-2.5 bg-[#0D1B2A] text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-[#028090] transition-all"
+              className="px-6 py-2.5 bg-brand-secondary text-on-primary text-xs font-black uppercase tracking-widest rounded-xl hover:bg-brand-primary transition-all"
             >
               Staff Login
             </button>
@@ -72,10 +72,10 @@ export default function PublicDoctorAvailabilityPage() {
       <main className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <div>
-            <h1 className="text-4xl md:text-5xl font-black text-[#0D1B2A] tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-black text-heading tracking-tight">
               Find a Doctor
             </h1>
-            <p className="text-gray-500 font-medium mt-2">
+            <p className="text-muted font-medium mt-2">
               Browse available doctors and book an appointment instantly.
             </p>
           </div>
@@ -83,7 +83,7 @@ export default function PublicDoctorAvailabilityPage() {
             <select
               value={specialty}
               onChange={(e) => setSpecialty(e.target.value)}
-              className="w-full md:w-48 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold text-[#0D1B2A] focus:ring-2 focus:ring-[#028090]/20 focus:border-[#028090] outline-none cursor-pointer"
+              className="w-full md:w-48 px-4 py-3 bg-surface border border-border rounded-xl text-sm font-bold text-heading focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none cursor-pointer"
             >
               {SPECIALTIES.map((s) => (
                 <option key={s} value={s}>{s === 'All' ? 'All Specialties' : s}</option>
@@ -92,7 +92,7 @@ export default function PublicDoctorAvailabilityPage() {
             <select
               value={hospitalId}
               onChange={(e) => setHospitalId(e.target.value)}
-              className="w-full md:w-56 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold text-[#0D1B2A] focus:ring-2 focus:ring-[#028090]/20 focus:border-[#028090] outline-none cursor-pointer"
+              className="w-full md:w-56 px-4 py-3 bg-surface border border-border rounded-xl text-sm font-bold text-heading focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none cursor-pointer"
             >
               <option value="All">All Hospitals</option>
               {hospitals.map((h) => (
@@ -101,7 +101,7 @@ export default function PublicDoctorAvailabilityPage() {
             </select>
             <button
               onClick={() => router.push('/doctors/map')}
-              className="px-5 py-3 bg-white border border-gray-200 rounded-xl text-sm font-black text-[#0D1B2A] hover:border-[#028090] transition-all whitespace-nowrap"
+              className="px-5 py-3 bg-surface border border-border rounded-xl text-sm font-black text-heading hover:border-brand-primary transition-all whitespace-nowrap"
             >
               Map View
             </button>
@@ -109,21 +109,21 @@ export default function PublicDoctorAvailabilityPage() {
         </div>
 
         {doctors.length > 0 && (
-          <div className="mb-8 flex items-center gap-2 text-sm text-gray-500">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          <div className="mb-8 flex items-center gap-2 text-sm text-muted">
+            <span className="w-2 h-2 rounded-full bg-brand-primary" />
             <span className="font-bold">{doctors.length} doctor{doctors.length !== 1 ? 's' : ''} currently available</span>
           </div>
         )}
 
         {doctors.length === 0 ? (
-          <div className="bg-white rounded-[2.5rem] border border-gray-100 p-20 text-center">
-            <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-surface rounded-[2.5rem] border border-border p-20 text-center">
+            <div className="w-16 h-16 bg-surface rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-muted/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-            <h3 className="text-xl font-black text-[#0D1B2A] mb-2">No Doctors Available</h3>
-            <p className="text-gray-500 font-medium">
+            <h3 className="text-xl font-black text-heading mb-2">No Doctors Available</h3>
+            <p className="text-muted font-medium">
               {specialty !== 'All' && hospitalId === 'All'
                 ? `No ${specialty} specialists are currently available. Try a different specialty.`
                 : specialty === 'All' && hospitalId !== 'All'
@@ -138,47 +138,47 @@ export default function PublicDoctorAvailabilityPage() {
             {doctors.map((doctor) => (
               <div
                 key={doctor.id}
-                className="bg-white rounded-[2rem] border border-gray-100 p-8 hover:border-[#028090]/20 hover:shadow-xl hover:shadow-[#028090]/5 transition-all group"
+                className="bg-surface rounded-[2rem] border border-border p-8 hover:border-brand-primary/20 hover:shadow-xl hover:shadow-brand-primary/5 transition-all group"
               >
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 rounded-2xl bg-[#028090]/10 flex items-center justify-center text-[#028090] font-black text-xl group-hover:scale-110 transition-transform">
+                  <div className="w-14 h-14 rounded-2xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-black text-xl group-hover:scale-110 transition-transform">
                     {doctor.user.name.split(' ').map((n) => n[0]).join('')}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-black text-[#0D1B2A] text-lg leading-tight truncate">{doctor.user.name}</h3>
-                    <p className="text-[#028090] text-sm font-bold">{doctor.specialty}</p>
+                    <h3 className="font-black text-heading text-lg leading-tight truncate">{doctor.user.name}</h3>
+                    <p className="text-brand-primary text-sm font-bold">{doctor.specialty}</p>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-100 whitespace-nowrap">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-brand-primary/10 text-brand-primary border border-brand-primary/20 whitespace-nowrap">
                     Available
                   </span>
                 </div>
 
                 <div className="space-y-3 mb-6">
                   <div className="flex items-center gap-3 text-sm">
-                    <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
-                    <span className="font-bold text-gray-600 truncate">{doctor.hospital.name}</span>
+                    <span className="font-bold text-muted truncate">{doctor.hospital.name}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
-                    <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <span className="font-bold text-gray-600">{doctor.hospital.location}</span>
+                    <span className="font-bold text-muted">{doctor.hospital.location}</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-2xl mb-6">
+                <div className="grid grid-cols-2 gap-4 p-4 bg-surface rounded-2xl mb-6">
                   <div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Wait Time</p>
-                    <p className={`font-black text-lg ${doctor.waitMinutes > 30 ? 'text-amber-600' : doctor.waitMinutes > 60 ? 'text-red-600' : 'text-emerald-600'}`}>
+                    <p className="text-[10px] font-black text-muted uppercase tracking-widest mb-1">Wait Time</p>
+                    <p className={`font-black text-lg ${doctor.waitMinutes > 30 ? 'text-brand-secondary' : doctor.waitMinutes > 60 ? 'text-brand-secondary' : 'text-brand-primary'}`}>
                       {doctor.waitTime}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Next Slot</p>
-                    <p className="font-black text-lg text-[#0D1B2A]">
+                    <p className="text-[10px] font-black text-muted uppercase tracking-widest mb-1">Next Slot</p>
+                    <p className="font-black text-lg text-heading">
                       {doctor.nextAvailableSlot
                         ? new Date(doctor.nextAvailableSlot).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                         : 'Today full'}
@@ -188,14 +188,14 @@ export default function PublicDoctorAvailabilityPage() {
 
                 <button
                   onClick={() => router.push(`/appointments?doctorId=${doctor.id}`)}
-                  className="w-full py-3.5 bg-[#028090] text-white rounded-xl font-black text-sm hover:bg-[#028090]/90 transition-all shadow-lg shadow-[#028090]/20"
+                  className="w-full py-3.5 bg-brand-primary text-on-primary rounded-xl font-black text-sm hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20"
                 >
                   Book Appointment
                 </button>
 
                 <a
                   href={`tel:${doctor.user.phone}`}
-                  className="block mt-3 text-center text-xs font-bold text-[#028090] hover:underline"
+                  className="block mt-3 text-center text-xs font-bold text-brand-primary hover:underline"
                 >
                   Call {doctor.hospital.name}
                 </a>
@@ -205,12 +205,12 @@ export default function PublicDoctorAvailabilityPage() {
         )}
       </main>
 
-      <footer className="border-t border-gray-100 py-8 mt-12">
+      <footer className="border-t border-border py-8 mt-12">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs font-bold text-gray-400">
+          <p className="text-xs font-bold text-muted">
             Foundation Care Network — Public Doctor Directory
           </p>
-          <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">
+          <p className="text-[10px] font-black text-muted/60 uppercase tracking-widest">
             Data updates in real-time
           </p>
         </div>

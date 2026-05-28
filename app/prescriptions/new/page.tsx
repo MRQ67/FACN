@@ -59,25 +59,25 @@ function NewPrescriptionContent() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-500 font-bold">Initializing clinical form...</div>;
+  if (loading) return <div className="p-8 text-center text-muted font-bold">Initializing clinical form...</div>;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8">
-      <div className="max-w-3xl mx-auto bg-white p-10 rounded-[2.5rem] shadow-sm border border-gray-100">
+    <div className="min-h-screen bg-brand-base p-4 md:p-8">
+      <div className="max-w-3xl mx-auto bg-surface p-10 rounded-[2.5rem] shadow-sm border border-border">
         <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+            <div className="w-12 h-12 bg-brand-primary/10 rounded-2xl flex items-center justify-center text-brand-primary">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             </div>
-            <h1 className="text-3xl font-black text-dark tracking-tight">Issue Digital Prescription</h1>
+            <h1 className="text-3xl font-black text-heading tracking-tight">Issue Digital Prescription</h1>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-gray-400">Select Patient</label>
+                <label className="text-xs font-black uppercase tracking-widest text-muted">Select Patient</label>
                 <select
                   required
-                  className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-primary font-bold text-dark cursor-pointer"
+                  className="w-full p-4 bg-surface border border-border rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading cursor-pointer"
                   value={formData.patientId}
                   onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
                 >
@@ -89,9 +89,9 @@ function NewPrescriptionContent() {
             </div>
 
             <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-gray-400">Preferred Pharmacy (Optional)</label>
+                <label className="text-xs font-black uppercase tracking-widest text-muted">Preferred Pharmacy (Optional)</label>
                 <select
-                  className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-primary font-bold text-dark cursor-pointer"
+                  className="w-full p-4 bg-surface border border-border rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading cursor-pointer"
                   value={formData.pharmacyId}
                   onChange={(e) => setFormData({ ...formData, pharmacyId: e.target.value })}
                 >
@@ -104,10 +104,10 @@ function NewPrescriptionContent() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-gray-400">Medications (one per line)</label>
+            <label className="text-xs font-black uppercase tracking-widest text-muted">Medications (one per line)</label>
             <textarea
               required
-              className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-primary font-bold text-dark"
+              className="w-full p-4 bg-surface border border-border rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
               rows={4}
               placeholder="Example:
 Amoxicillin 500mg - 3x daily - 7 days
@@ -118,9 +118,9 @@ Paracetamol 1000mg - every 6 hours as needed"
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-gray-400">Doctor's Instructions & Notes</label>
+            <label className="text-xs font-black uppercase tracking-widest text-muted">Doctor's Instructions & Notes</label>
             <textarea
-              className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-primary font-bold text-dark"
+              className="w-full p-4 bg-surface border border-border rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
               rows={3}
               placeholder="Additional instructions for the patient or pharmacist..."
               value={formData.notes}
@@ -129,17 +129,17 @@ Paracetamol 1000mg - every 6 hours as needed"
           </div>
 
           <div className="space-y-2 max-w-xs">
-            <label className="text-xs font-black uppercase tracking-widest text-gray-400">Expiry Date (Optional)</label>
+            <label className="text-xs font-black uppercase tracking-widest text-muted">Expiry Date (Optional)</label>
             <input
                 type="date"
-                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-primary font-bold text-dark"
+                className="w-full p-4 bg-surface border border-border rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
                 value={formData.expiresAt}
                 onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
             />
           </div>
 
-          <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-3 text-emerald-600">
+          <div className="pt-6 border-t border-border flex items-center justify-between">
+            <div className="flex items-center gap-3 text-brand-primary">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                 <span className="text-xs font-black uppercase tracking-widest">Digitally Signed & Verified</span>
             </div>
@@ -147,14 +147,14 @@ Paracetamol 1000mg - every 6 hours as needed"
                 <button
                     type="button"
                     onClick={() => router.back()}
-                    className="px-8 py-4 text-gray-500 font-bold hover:text-dark transition-colors"
+                    className="px-8 py-4 text-muted font-bold hover:text-heading transition-colors"
                 >
                     Cancel
                 </button>
                 <button
                     type="submit"
                     disabled={submitting}
-                    className="px-10 py-4 bg-primary text-white rounded-2xl font-black shadow-xl shadow-primary/20 hover:scale-105 transition-transform disabled:opacity-50"
+                    className="px-10 py-4 bg-brand-primary text-on-primary rounded-2xl font-black shadow-xl shadow-brand-primary/20 hover:scale-105 transition-transform disabled:opacity-50"
                 >
                     {submitting ? 'Issuing...' : 'Issue Prescription'}
                 </button>
@@ -168,7 +168,7 @@ Paracetamol 1000mg - every 6 hours as needed"
 
 export default function NewPrescriptionPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-gray-500 font-bold">Loading...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-muted font-bold">Loading...</div>}>
       <NewPrescriptionContent />
     </Suspense>
   );

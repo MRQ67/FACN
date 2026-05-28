@@ -89,21 +89,21 @@ export default function RecordVitalsPage() {
   if (loading) return <div className="p-8 text-center">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8">
-      <div className="max-w-2xl mx-auto bg-white p-10 rounded-[2.5rem] shadow-sm border border-gray-100">
+    <div className="min-h-screen bg-brand-base p-4 md:p-8">
+      <div className="max-w-2xl mx-auto bg-surface p-10 rounded-[2.5rem] shadow-sm border border-border">
         <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+            <div className="w-12 h-12 bg-brand-primary/10 rounded-2xl flex items-center justify-center text-brand-primary">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
             </div>
-            <h1 className="text-3xl font-black text-dark tracking-tight">Record Vitals</h1>
+            <h1 className="text-3xl font-black text-heading tracking-tight">Record Vitals</h1>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-gray-400">Select Patient</label>
+            <label className="text-xs font-black uppercase tracking-widest text-muted">Select Patient</label>
             <select
               required
-              className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-primary font-bold text-dark cursor-pointer"
+              className="w-full p-4 bg-surface border border-border rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading cursor-pointer"
               value={formData.patientId}
               onChange={(e) => setFormData({ ...formData, patientId: e.target.value })}
             >
@@ -116,54 +116,54 @@ export default function RecordVitalsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-gray-400">Blood Pressure (sys/dia)</label>
+              <label className="text-xs font-black uppercase tracking-widest text-muted">Blood Pressure (sys/dia)</label>
               <input
                 type="text"
                 required
                 placeholder="120/80"
-                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-primary font-bold text-dark"
+                className="w-full p-4 bg-surface border border-border rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
                 value={formData.bloodPressure}
                 onChange={(e) => setFormData({ ...formData, bloodPressure: e.target.value })}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-gray-400">Heart Rate (bpm)</label>
+              <label className="text-xs font-black uppercase tracking-widest text-muted">Heart Rate (bpm)</label>
               <input
                 type="number"
                 placeholder="72"
-                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-primary font-bold text-dark"
+                className="w-full p-4 bg-surface border border-border rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
                 value={formData.heartRate}
                 onChange={(e) => setFormData({ ...formData, heartRate: e.target.value })}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-gray-400">Oxygen Saturation (%)</label>
+              <label className="text-xs font-black uppercase tracking-widest text-muted">Oxygen Saturation (%)</label>
               <input
                 type="number"
                 step="0.1"
                 placeholder="98"
-                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-primary font-bold text-dark"
+                className="w-full p-4 bg-surface border border-border rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
                 value={formData.oxygenSat}
                 onChange={(e) => setFormData({ ...formData, oxygenSat: e.target.value })}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-gray-400">Temperature (°C)</label>
+              <label className="text-xs font-black uppercase tracking-widest text-muted">Temperature (°C)</label>
               <input
                 type="number"
                 step="0.1"
                 placeholder="36.6"
-                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-primary font-bold text-dark"
+                className="w-full p-4 bg-surface border border-border rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
                 value={formData.temp}
                 onChange={(e) => setFormData({ ...formData, temp: e.target.value })}
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-gray-400">Blood Glucose (mg/dL)</label>
+              <label className="text-xs font-black uppercase tracking-widest text-muted">Blood Glucose (mg/dL)</label>
               <input
                 type="number"
                 placeholder="90"
-                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-primary font-bold text-dark"
+                className="w-full p-4 bg-surface border border-border rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
                 value={formData.glucose}
                 onChange={(e) => setFormData({ ...formData, glucose: e.target.value })}
               />
@@ -172,18 +172,18 @@ export default function RecordVitalsPage() {
 
           <div className="space-y-4">
             <div className="flex justify-between items-end">
-                <label className="text-xs font-black uppercase tracking-widest text-gray-400">Clinical Notes / Symptoms</label>
+                <label className="text-xs font-black uppercase tracking-widest text-muted">Clinical Notes / Symptoms</label>
                 <button 
                     type="button"
                     onClick={handleAnalyzeTriage}
                     disabled={analyzing}
-                    className="text-[10px] font-black uppercase tracking-widest bg-dark text-white px-3 py-1 rounded-lg hover:bg-primary transition-colors disabled:opacity-50"
+                    className="text-[10px] font-black uppercase tracking-widest bg-brand-secondary text-on-primary px-3 py-1 rounded-lg hover:bg-brand-primary transition-colors disabled:opacity-50"
                 >
                     {analyzing ? 'Analyzing...' : 'Trigger AI Triage ✨'}
                 </button>
             </div>
             <textarea
-              className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-primary font-bold text-dark"
+              className="w-full p-4 bg-surface border border-border rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
               rows={4}
               placeholder="Describe any symptoms or observations (min 10 characters for AI analysis)..."
               value={formData.notes}
@@ -192,22 +192,22 @@ export default function RecordVitalsPage() {
           </div>
 
           {triageResult && (
-              <div className="p-6 bg-primary/5 border border-primary/20 rounded-3xl space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="p-6 bg-brand-primary/5 border border-brand-primary/20 rounded-3xl space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
                   <div className="flex justify-between items-center">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black text-white ${
-                          triageResult.priority === 'CRITICAL' ? 'bg-red-500' : 
-                          triageResult.priority === 'URGENT' ? 'bg-amber-500' : 'bg-emerald-500'
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black text-on-primary ${
+                          triageResult.priority === 'CRITICAL' ? 'bg-brand-secondary' : 
+                          triageResult.priority === 'URGENT' ? 'bg-brand-secondary' : 'bg-brand-primary'
                       }`}>
                           {triageResult.priority} PRIORITY
                       </span>
-                      <span className="text-[10px] font-black text-primary uppercase tracking-widest">AI Assessment Guidance</span>
+                      <span className="text-[10px] font-black text-brand-primary uppercase tracking-widest">AI Assessment Guidance</span>
                   </div>
-                  <p className="text-sm font-bold text-dark leading-tight">{triageResult.summary}</p>
-                  <div className="p-3 bg-white/50 rounded-xl">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Recommendation</p>
-                      <p className="text-xs text-gray-600 italic font-medium">"{triageResult.recommendation}"</p>
+                  <p className="text-sm font-bold text-heading leading-tight">{triageResult.summary}</p>
+                  <div className="p-3 bg-surface/50 rounded-xl">
+                      <p className="text-[10px] font-black text-muted uppercase tracking-widest mb-1">Recommendation</p>
+                      <p className="text-xs text-muted italic font-medium">"{triageResult.recommendation}"</p>
                   </div>
-                  <p className="text-[10px] text-gray-400 font-medium italic">* This is AI assistance only. Always follow doctor instructions.</p>
+                  <p className="text-[10px] text-muted font-medium italic">* This is AI assistance only. Always follow doctor instructions.</p>
               </div>
           )}
 
@@ -215,14 +215,14 @@ export default function RecordVitalsPage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-8 py-4 text-gray-500 font-bold hover:text-dark transition-colors"
+              className="px-8 py-4 text-muted font-bold hover:text-heading transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-10 py-4 bg-primary text-white rounded-2xl font-black shadow-xl shadow-primary/20 hover:scale-105 transition-transform disabled:opacity-50"
+              className="px-10 py-4 bg-brand-primary text-on-primary rounded-2xl font-black shadow-xl shadow-brand-primary/20 hover:scale-105 transition-transform disabled:opacity-50"
             >
               {submitting ? 'Recording...' : 'Complete Entry'}
             </button>
