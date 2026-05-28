@@ -19,6 +19,8 @@ import {
 import { HoverExpand_001 } from "@/components/ui/skiper-ui/skiper52";
 import { HoverExpand_002 } from "@/components/ui/skiper-ui/skiper53";
 import { CTASection } from "@/components/ui/hero-dithering-card";
+import { FooterReveal } from "@/components/footer-reveal";
+import { ShaderAnimation } from "@/components/ui/shader-animation";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -47,74 +49,74 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-brand-base selection:bg-brand-primary/20">
-      {/* Premium Navigation */}
-      <nav className="sticky top-0 z-50 bg-surface/80 backdrop-blur-xl border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
-          <div
-            className="flex items-center space-x-4 group cursor-pointer"
-            onClick={() => router.push("/")}
-          >
-            {mounted ? (
-              <Image
-                src={
-                  resolvedTheme === "dark"
-                    ? "/logo_dark.svg"
-                    : "/logo_light.svg"
-                }
-                alt="FMC Logo"
-                width={200}
-                height={48}
-                className="h-12 w-auto group-hover:scale-105 transition-transform duration-500"
-                priority
-              />
-            ) : (
-              <div className="h-12 w-[160px]" />
-            )}
-          </div>
-
-          <div className="hidden lg:flex items-center space-x-10">
-            <button
-              onClick={() => router.push("/doctors/available")}
-              className="text-xs font-black text-muted hover:text-heading uppercase tracking-widest transition-colors"
+    <div className="min-h-screen selection:bg-brand-primary/20">
+      <div className="relative z-10 bg-brand-base shadow-2xl">
+        {/* Premium Navigation */}
+        <nav className="sticky top-0 z-50 bg-surface/80 backdrop-blur-xl border-b border-border">
+          <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+            <div
+              className="flex items-center space-x-4 group cursor-pointer"
+              onClick={() => router.push("/")}
             >
-              Find a Doctor
-            </button>
-            {["Services", "About"].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
+              {mounted ? (
+                <Image
+                  src={
+                    resolvedTheme === "dark"
+                      ? "/logo_dark.svg"
+                      : "/logo_light.svg"
+                  }
+                  alt="FMC Logo"
+                  width={200}
+                  height={48}
+                  className="h-12 w-auto group-hover:scale-105 transition-transform duration-500"
+                  priority
+                />
+              ) : (
+                <div className="h-12 w-[160px]" />
+              )}
+            </div>
+
+            <div className="hidden lg:flex items-center space-x-10">
+              <button
+                onClick={() => router.push("/doctors/available")}
                 className="text-xs font-black text-muted hover:text-heading uppercase tracking-widest transition-colors"
               >
-                {item}
-              </a>
-            ))}
-            <div className="h-8 w-px bg-surface mx-2"></div>
-            <AnimatedThemeToggler />
-            <Show when="signed-in">
-              <div className="flex items-center gap-4">
-                <CosmicButton
-                  as="button"
-                  onClick={() => router.push("/dashboard")}
-                >
-                  Go to Dashboard
-                </CosmicButton>
-                <UserButton />
-              </div>
-            </Show>
-            <Show when="signed-out">
-              <button
-                onClick={() => router.push("/sign-in")}
-                className="px-8 py-3 bg-brand-secondary text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-brand-primary hover:shadow-2xl hover:shadow-brand-primary/20 transition-all shadow-lg"
-              >
-                Get Started
+                Find a Doctor
               </button>
-            </Show>
+              {["Services", "About"].map((item) => (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className="text-xs font-black text-muted hover:text-heading uppercase tracking-widest transition-colors"
+                >
+                  {item}
+                </a>
+              ))}
+              <div className="h-8 w-px bg-surface mx-2"></div>
+              <AnimatedThemeToggler />
+              <Show when="signed-in">
+                <div className="flex items-center gap-4">
+                  <CosmicButton
+                    as="button"
+                    onClick={() => router.push("/dashboard")}
+                  >
+                    Go to Dashboard
+                  </CosmicButton>
+                  <UserButton />
+                </div>
+              </Show>
+              <Show when="signed-out">
+                <button
+                  onClick={() => router.push("/sign-in")}
+                  className="px-8 py-3 bg-brand-secondary text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-brand-primary hover:shadow-2xl hover:shadow-brand-primary/20 transition-all shadow-lg"
+                >
+                  Get Started
+                </button>
+              </Show>
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      <main>
         {/* Hero Section */}
         <section className="relative pt-20 pb-40 overflow-hidden bg-brand-base">
           <div className="absolute top-0 right-0 -z-10 w-2/3 h-full opacity-5 mesh-gradient blur-3xl rounded-full translate-x-1/4 -translate-y-1/4"></div>
@@ -171,42 +173,6 @@ export default function LandingPage() {
                     alt="Professional Medical Care"
                     className="w-full h-[600px] object-cover"
                   />
-                </div>
-                <div className="absolute -bottom-12 -left-12 z-20 bg-surface p-10 rounded-[2.5rem] hidden md:block border border-border shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)]">
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-5">
-                      <div className="w-14 h-14 bg-brand-primary rounded-2xl flex items-center justify-center text-on-primary shadow-lg shadow-brand-primary/20">
-                        <svg
-                          className="w-8 h-8"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2.5}
-                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-3xl font-black text-heading tracking-tighter">
-                          100%
-                        </p>
-                        <p className="text-[10px] font-black text-muted uppercase tracking-widest">
-                          Uptime Record
-                        </p>
-                      </div>
-                    </div>
-                    <div className="h-px bg-surface"></div>
-                    <div className="flex items-center gap-4 text-brand-primary">
-                      <span className="w-2 h-2 rounded-full bg-brand-primary animate-ping"></span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-brand-primary">
-                        Secure Network Live
-                      </span>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -425,144 +391,144 @@ export default function LandingPage() {
 
         {/* CTA Section */}
         <CTASection />
-      </main>
+      </div>
 
       {/* Comprehensive Footer */}
-      <footer className="pt-32 pb-16 bg-surface border-t border-border">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
-            <div className="space-y-8">
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-brand-secondary rounded-xl flex items-center justify-center">
-                  <svg
-                    className="w-6 h-6 text-brand-primary"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2.5}
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+      <FooterReveal height="min-h-[800px] md:min-h-[600px]">
+        <footer className="pt-32 pb-16 bg-surface border-t border-border h-full flex items-center">
+          <div className="max-w-7xl mx-auto px-6 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
+              <div className="space-y-8">
+                <div className="flex items-center space-x-4">
+                  {mounted ? (
+                    <Image
+                      src={
+                        resolvedTheme === "dark"
+                          ? "/logo_dark.svg"
+                          : "/logo_light.svg"
+                      }
+                      alt="FMC Logo"
+                      width={200}
+                      height={48}
+                      className="h-12 w-auto"
+                      priority
                     />
-                  </svg>
+                  ) : (
+                    <div className="h-12 w-[160px]" />
+                  )}
                 </div>
-                <span className="text-2xl font-black text-heading tracking-tighter uppercase">
-                  FMC
-                </span>
-              </div>
-              <p className="text-muted font-medium text-sm leading-relaxed">
-                Foundation Medical Center (FMC) is a digital healthcare
-                initiative to modernize clinical infrastructure through
-                high-fidelity monitoring and AI-assisted triage.
-              </p>
-              <div className="flex gap-4">
-                {["twitter", "linkedin", "facebook"].map((social) => (
-                  <div
-                    key={social}
-                    className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center text-muted hover:text-brand-primary cursor-pointer transition-colors shadow-sm"
-                  >
-                    <span className="sr-only">{social}</span>
-                    <div className="w-4 h-4 bg-current rounded-sm"></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-8">
-              <h4 className="text-[10px] font-black text-heading uppercase tracking-[0.3em]">
-                Portal Access
-              </h4>
-              <ul className="space-y-4">
-                {[
-                  { label: "Patient Registry", link: "/login" },
-                  { label: "Specialist Directory", link: "/login" },
-                  { label: "Clinical Portal", link: "/login" },
-                  { label: "Triage Analytics", link: "/login" },
-                  { label: "Internal Support", link: "/login" },
-                ].map((link) => (
-                  <li key={link.label}>
-                    <button
-                      onClick={() => router.push(link.link)}
-                      className="text-sm font-bold text-muted hover:text-brand-primary transition-colors text-left"
-                    >
-                      {link.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-8">
-              <h4 className="text-[10px] font-black text-heading uppercase tracking-[0.3em]">
-                Institutional
-              </h4>
-              <ul className="space-y-4">
-                {[
-                  "About the Center",
-                  "Medical Board",
-                  "Health Authority",
-                  "Clinical Research",
-                  "Technical Specs",
-                ].map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
-                      className="text-sm font-bold text-muted hover:text-brand-primary transition-colors"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="space-y-8">
-              <h4 className="text-[10px] font-black text-heading uppercase tracking-[0.3em]">
-                System Support
-              </h4>
-              <div className="p-6 bg-brand-base rounded-3xl border border-border shadow-sm">
-                <p className="text-xs font-bold text-heading mb-4">
-                  Operational Status
+                <p className="text-muted font-medium text-sm leading-relaxed">
+                  Foundation Medical Center (FMC) is a digital healthcare
+                  initiative to modernize clinical infrastructure through
+                  high-fidelity monitoring and AI-assisted triage.
                 </p>
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="w-2 h-2 rounded-full bg-brand-primary animate-pulse"></span>
-                  <span className="text-[10px] font-black text-brand-primary uppercase tracking-widest">
-                    All Systems Operational
-                  </span>
+                <div className="flex gap-4">
+                  {["twitter", "linkedin", "facebook"].map((social) => (
+                    <div
+                      key={social}
+                      className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center text-muted hover:text-brand-primary cursor-pointer transition-colors shadow-sm"
+                    >
+                      <span className="sr-only">{social}</span>
+                      <div className="w-4 h-4 bg-current rounded-sm"></div>
+                    </div>
+                  ))}
                 </div>
-                <button className="w-full py-3 bg-surface border border-border text-[10px] font-black text-heading uppercase tracking-widest rounded-xl hover:border-brand-primary transition-all shadow-sm">
-                  Support Desk
-                </button>
               </div>
-            </div>
-          </div>
 
-          <div className="pt-12 border-t border-border flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex items-center gap-6">
-              <div className="text-xs font-bold text-muted uppercase tracking-widest">
-                &copy; {new Date().getFullYear()} FMC Institutional Portal
+              <div className="space-y-8">
+                <h4 className="text-[10px] font-black text-heading uppercase tracking-[0.3em]">
+                  Portal Access
+                </h4>
+                <ul className="space-y-4">
+                  {[
+                    { label: "Patient Registry", link: "/login" },
+                    { label: "Specialist Directory", link: "/login" },
+                    { label: "Clinical Portal", link: "/login" },
+                    { label: "Triage Analytics", link: "/login" },
+                    { label: "Internal Support", link: "/login" },
+                  ].map((link) => (
+                    <li key={link.label}>
+                      <button
+                        onClick={() => router.push(link.link)}
+                        className="text-sm font-bold text-muted hover:text-brand-primary transition-colors text-left"
+                      >
+                        {link.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div className="w-1.5 h-1.5 rounded-full bg-surface"></div>
-              <div className="text-xs font-bold text-muted uppercase tracking-widest">
-                Global Healthcare Excellence
+
+              <div className="space-y-8">
+                <h4 className="text-[10px] font-black text-heading uppercase tracking-[0.3em]">
+                  Institutional
+                </h4>
+                <ul className="space-y-4">
+                  {[
+                    "About the Center",
+                    "Medical Board",
+                    "Health Authority",
+                    "Clinical Research",
+                    "Technical Specs",
+                  ].map((link) => (
+                    <li key={link}>
+                      <a
+                        href="#"
+                        className="text-sm font-bold text-muted hover:text-brand-primary transition-colors"
+                      >
+                        {link}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="space-y-8">
+                <h4 className="text-[10px] font-black text-heading uppercase tracking-[0.3em]">
+                  System Support
+                </h4>
+                <div className="p-6 bg-brand-base rounded-3xl border border-border shadow-sm">
+                  <p className="text-xs font-bold text-heading mb-4">
+                    Operational Status
+                  </p>
+                  <div className="flex items-center gap-3 mb-6">
+                    <span className="w-2 h-2 rounded-full bg-brand-primary animate-pulse"></span>
+                    <span className="text-[10px] font-black text-brand-primary uppercase tracking-widest">
+                      All Systems Operational
+                    </span>
+                  </div>
+                  <button className="w-full py-3 bg-surface border border-border text-[10px] font-black text-heading uppercase tracking-widest rounded-xl hover:border-brand-primary transition-all shadow-sm">
+                    Support Desk
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="flex gap-10 text-[10px] font-black text-muted uppercase tracking-widest">
-              <a href="#" className="hover:text-heading transition-colors">
-                Privacy
-              </a>
-              <a href="#" className="hover:text-heading transition-colors">
-                Terms
-              </a>
-              <a href="#" className="hover:text-heading transition-colors">
-                Security
-              </a>
+
+            <div className="pt-12 border-t border-border flex flex-col md:flex-row justify-between items-center gap-8">
+              <div className="flex items-center gap-6">
+                <div className="text-xs font-bold text-muted uppercase tracking-widest">
+                  &copy; {new Date().getFullYear()} FMC Institutional Portal
+                </div>
+                <div className="w-1.5 h-1.5 rounded-full bg-surface"></div>
+                <div className="text-xs font-bold text-muted uppercase tracking-widest">
+                  Global Healthcare Excellence
+                </div>
+              </div>
+              <div className="flex gap-10 text-[10px] font-black text-muted uppercase tracking-widest">
+                <a href="#" className="hover:text-heading transition-colors">
+                  Privacy
+                </a>
+                <a href="#" className="hover:text-heading transition-colors">
+                  Terms
+                </a>
+                <a href="#" className="hover:text-heading transition-colors">
+                  Security
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </FooterReveal>
     </div>
   );
 }
