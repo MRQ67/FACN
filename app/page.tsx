@@ -9,11 +9,42 @@ import {
   useUser,
   useClerk,
 } from "@clerk/nextjs";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
+import {
+  Marquee,
+  MarqueeContent,
+  MarqueeFade,
+  MarqueeItem,
+} from "@/components/kibo-ui/marquee";
+import { HoverExpand_001 } from "@/components/ui/skiper-ui/skiper52";
+import { HoverExpand_002 } from "@/components/ui/skiper-ui/skiper53";
+import { CTASection } from "@/components/ui/hero-dithering-card";
+import Image from "next/image";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { CosmicButton } from "@/components/ui/cosmic-button";
 
 export default function LandingPage() {
   const router = useRouter();
   const { isSignedIn } = useUser();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const integratedCareItems = [
+    { src: "/core/AI.jpg", alt: "AI Triage", code: "# 01" },
+    {
+      src: "/core/doctor-consult.jpg",
+      alt: "Doctor Consultations",
+      code: "# 02",
+    },
+    { src: "/core/vital.jpg", alt: "Vitals Monitoring", code: "# 03" },
+    { src: "/core/lab-result.jpg", alt: "Lab Results", code: "# 04" },
+    { src: "/core/E-prescrption.jpg", alt: "E-Prescriptions", code: "# 05" },
+  ];
 
   return (
     <div className="min-h-screen bg-brand-base selection:bg-brand-primary/20">
@@ -24,29 +55,22 @@ export default function LandingPage() {
             className="flex items-center space-x-4 group cursor-pointer"
             onClick={() => router.push("/")}
           >
-            <div className="w-12 h-12 bg-brand-secondary rounded-2xl flex items-center justify-center shadow-2xl shadow-brand-secondary/20 group-hover:scale-110 transition-all duration-500">
-              <svg
-                className="w-7 h-7 text-brand-primary"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-2xl font-black text-heading tracking-tighter leading-none">
-                FMC
-              </span>
-              <span className="text-[8px] font-black text-brand-primary uppercase tracking-[0.3em] mt-1">
-                Foundation Medical Center
-              </span>
-            </div>
+            {mounted ? (
+              <Image
+                src={
+                  resolvedTheme === "dark"
+                    ? "/logo_dark.svg"
+                    : "/logo_light.svg"
+                }
+                alt="FMC Logo"
+                width={200}
+                height={48}
+                className="h-12 w-auto group-hover:scale-105 transition-transform duration-500"
+                priority
+              />
+            ) : (
+              <div className="h-12 w-[160px]" />
+            )}
           </div>
 
           <div className="hidden lg:flex items-center space-x-10">
@@ -66,15 +90,15 @@ export default function LandingPage() {
               </a>
             ))}
             <div className="h-8 w-px bg-surface mx-2"></div>
-            <ThemeToggle />
+            <AnimatedThemeToggler />
             <Show when="signed-in">
               <div className="flex items-center gap-4">
-                <button
+                <CosmicButton
+                  as="button"
                   onClick={() => router.push("/dashboard")}
-                  className="px-6 py-3 bg-brand-secondary text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-brand-primary transition-all shadow-lg"
                 >
-                  Dashboard
-                </button>
+                  Go to Dashboard
+                </CosmicButton>
                 <UserButton />
               </div>
             </Show>
@@ -98,10 +122,6 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex flex-col lg:flex-row items-center gap-24">
               <div className="flex-1 space-y-10">
-                <div className="inline-flex items-center px-5 py-2 rounded-full bg-brand-primary/5 border border-brand-primary/10 text-brand-primary text-[10px] font-black tracking-[0.2em] uppercase shadow-sm">
-                  <span className="w-2 h-2 rounded-full bg-brand-primary animate-pulse mr-3"></span>
-                  Advanced Institutional Healthcare
-                </div>
                 <h1 className="text-6xl md:text-8xl font-black text-heading leading-[0.9] tracking-tighter">
                   Excellence in <br />
                   <span className="text-gradient">Medical Care.</span>
@@ -193,40 +213,36 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Partnership Section */}
-        <section className="py-12 bg-surface border-y border-border overflow-hidden">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-12 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-              <p className="text-[10px] font-black text-muted uppercase tracking-[0.4em]">
-                Institutional Accreditation
-              </p>
-              <div className="flex flex-wrap justify-center gap-12 md:gap-24">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-surface rounded-full"></div>
-                  <span className="text-sm font-black text-heading">
-                    Medical Board
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-surface rounded-full"></div>
-                  <span className="text-sm font-black text-heading">
-                    Health Authority
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-surface rounded-full"></div>
-                  <span className="text-sm font-black text-heading">
-                    Ministry of Health
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-surface rounded-full"></div>
-                  <span className="text-sm font-black text-heading">
-                    Clinical Excellence
-                  </span>
-                </div>
-              </div>
-            </div>
+        {/* Sponsors Section */}
+        <section className="py-12 bg-brand-base overflow-hidden border-y border-border/50">
+          <div className="w-full mx-auto max-w-[100vw]">
+            <p className="text-center text-[10px] font-black text-muted uppercase tracking-[0.4em] mb-10">
+              Trusted & Supported By
+            </p>
+            <Marquee>
+              <MarqueeFade side="left" className="from-brand-base" />
+              <MarqueeContent>
+                {[
+                  "Dire Dawa University",
+                  "Dire Dawa Health Bureau",
+                  "Ethiopian Ministry of Health",
+                  "Dil Chora Referral Hospital",
+                  "Sabian Health Center",
+                  "Harar Health Sciences College",
+                  "Rift Valley University",
+                ].map((name, i) => (
+                  <MarqueeItem key={i} className="mx-4 md:mx-6">
+                    <div className="flex items-center justify-center px-8 py-4 border border-border rounded-[2rem] bg-surface shadow-sm hover:border-brand-primary/30 hover:shadow-brand-primary/5 transition-all duration-300">
+                      {/* logo will go here */}
+                      <span className="text-sm font-black text-heading whitespace-nowrap">
+                        {name}
+                      </span>
+                    </div>
+                  </MarqueeItem>
+                ))}
+              </MarqueeContent>
+              <MarqueeFade side="right" className="from-brand-base" />
+            </Marquee>
           </div>
         </section>
 
@@ -246,42 +262,11 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              {[
-                {
-                  role: "Specialized Doctors",
-                  desc: "Our specialists use FMC to provide high-fidelity consultations and manage complex patient records.",
-                  img: "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&q=80&w=600",
-                },
-                {
-                  role: "Clinical Staff",
-                  desc: "Nurses and technicians record real-time vitals and manage daily patient workflows with precision.",
-                  img: "https://images.unsplash.com/photo-1584515159910-689360697992?auto=format&fit=crop&q=80&w=600",
-                },
-                {
-                  role: "Administrative Care",
-                  desc: "Our administrative team ensures seamless scheduling and record management for all institutional needs.",
-                  img: "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=600",
-                },
-              ].map((step, i) => (
-                <div key={i} className="group space-y-8">
-                  <div className="relative rounded-[2.5rem] overflow-hidden aspect-[4/5] shadow-xl group-hover:shadow-2xl transition-all duration-500">
-                    <img
-                      src={step.img}
-                      alt={step.role}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-brand-secondary/80 to-transparent flex flex-col justify-end p-8 text-white">
-                      <p className="text-2xl font-black leading-tight mb-2">
-                        {step.role}
-                      </p>
-                      <p className="text-xs font-medium text-white/80 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                        {step.desc}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="hidden md:flex justify-center w-full">
+              <HoverExpand_001 images={integratedCareItems} />
+            </div>
+            <div className="block md:hidden w-full overflow-hidden">
+              <HoverExpand_002 images={integratedCareItems} />
             </div>
           </div>
         </section>
@@ -439,41 +424,7 @@ export default function LandingPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-32 bg-surface">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="bg-brand-primary rounded-[4rem] p-16 md:p-32 relative overflow-hidden group shadow-2xl shadow-brand-primary/20 text-center">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-1000"></div>
-
-              <div className="relative z-10 space-y-10">
-                <h2 className="text-5xl md:text-7xl font-black text-on-primary tracking-tighter">
-                  Advanced Healthcare <br /> Starts Here.
-                </h2>
-                <p className="text-xl text-on-primary/80 font-medium max-w-2xl mx-auto">
-                  The FMC Portal is our central hub for clinical excellence and
-                  patient management.
-                </p>
-                <div className="flex flex-wrap justify-center gap-6">
-                  <button
-                    onClick={() =>
-                      router.push(isSignedIn ? "/dashboard" : "/sign-in")
-                    }
-                    className="px-12 py-5 bg-surface text-brand-primary font-black rounded-2xl text-xl hover:scale-105 transition-transform shadow-2xl"
-                  >
-                    Access Portal
-                  </button>
-                  <button
-                    onClick={() =>
-                      router.push(isSignedIn ? "/dashboard" : "/sign-in")
-                    }
-                    className="px-12 py-5 bg-brand-secondary text-white font-black rounded-2xl text-xl hover:bg-black transition-all shadow-2xl"
-                  >
-                    Staff Login
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <CTASection />
       </main>
 
       {/* Comprehensive Footer */}
