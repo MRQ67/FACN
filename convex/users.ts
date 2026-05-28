@@ -126,6 +126,53 @@ export const updateProfile = mutation({
   },
 });
 
+export const completeOnboarding = mutation({
+  args: {
+    name: v.string(),
+    role: v.union(
+      v.literal("PATIENT"),
+      v.literal("DOCTOR"),
+      v.literal("NURSE"),
+      v.literal("RURAL_HO"),
+      v.literal("ADMIN"),
+    ),
+    phone: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new ConvexError("Not authenticated");
+
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_tokenIdentifier", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
+      )
+      .unique();
+
+    if (existing) {
+      const patch: Record<string, unknown> = {};
+      if (args.name) patch.name = args.name;
+      if (args.phone) patch.phone = args.phone;
+      if (args.role) patch.role = args.role;
+      await ctx.db.patch("users", existing._id, patch);
+      return existing._id;
+    }
+
+    const userId = await ctx.db.insert("users", {
+      tokenIdentifier: identity.tokenIdentifier,
+      name: args.name,
+      email: identity.email ?? "",
+      phone: args.phone,
+      role: args.role,
+      isVerified: true,
+      isApproved: args.role === "PATIENT",
+      createdAt: Date.now(),
+    });
+
+    return userId;
+  },
+});
+
 export const listPatients = query({
   args: { search: v.optional(v.string()) },
   handler: async (ctx, args) => {
