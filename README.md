@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FACN — Fast Access Care Network
+
+A telemedicine platform for Dire Dawa, Ethiopia. Connects patients, nurses, rural health officers, and specialist doctors through a unified digital infrastructure with AI-assisted triage.
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router, Turbopack)
+- **Backend:** Convex (reactive DB + server functions)
+- **Authentication:** Clerk (JWT, OAuth, orgs)
+- **Styling:** Tailwind CSS 4
+- **AI Triage:** Claude (Anthropic API)
+- **Charts:** Recharts
+
+## Features
+
+- **Role-based dashboards** — separate views for Patients, Doctors, Nurses, Rural HOs, and Admins
+- **Smart Triage** — AI-powered symptom analysis using Claude
+- **Appointment scheduling** — book and manage in-person/remote visits
+- **Vitals tracking** — record and monitor BP, heart rate, O2 sat, temperature, glucose
+- **Consultations** — rural HOs request specialist advice; doctors pick up cases
+- **Prescriptions & Lab Results** — digital ordering and results management
+- **Admin panel** — user approval, audit logs, hospital/pharmacy management
+- **Real-time availability** — doctors toggle availability with GPS location sharing
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- pnpm
+
+### Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy `env.local.example` to `.env.local` (or edit the existing one):
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_CONVEX_URL` | Convex deployment URL |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key |
+| `CLERK_SECRET_KEY` | Clerk secret key |
+| `CLERK_JWT_ISSUER_DOMAIN` | Clerk JWT issuer URL (from Clerk Dashboard → JWT Templates → convex) |
+| `CLAUDE_API_KEY` | Anthropic API key for AI triage |
 
-## Learn More
+### Run Development
 
-To learn more about Next.js, take a look at the following resources:
+Start both servers in separate terminals:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Terminal 1 — Convex backend (auto-deploys on file changes)
+npx convex dev
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Terminal 2 — Next.js frontend
+pnpm dev
+```
 
-## Deploy on Vercel
+Open [http://localhost:3000](http://localhost:3000).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Deploy Convex Functions
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx convex deploy
+```
+
+## Project Structure
+
+```
+app/                    # Next.js App Router pages
+  dashboard/            # Main dashboard with role-based sections
+  admin/                # Admin panel (users, audit logs, hospitals, pharmacies)
+  appointments/         # Appointment management
+  consultations/        # Specialist consultation network
+  doctors/              # Doctor directory and map view
+  lab/                  # Lab results
+  patients/             # Patient registry and profiles
+  prescriptions/        # Prescription management
+  profile/              # User profile
+  settings/             # App settings
+  triage/               # AI symptom analysis
+  vitals/               # Vitals recording and history
+  providers.tsx         # Clerk + Convex provider wrapper
+  layout.tsx            # Root layout
+  page.tsx              # Landing page
+convex/                 # Convex backend
+  schema.ts             # Database schema (14 tables)
+  users.ts              # User management functions
+  appointments.ts       # Appointment queries and mutations
+  doctors.ts            # Doctor availability and location
+  patients.ts           # Patient queries
+  admin.ts              # Admin statistics
+  vitals.ts             # Vitals recording
+  prescriptions.ts      # Prescription management
+  consultations.ts      # Consultation requests
+  notifications.ts      # Notification queries
+  hospitals.ts          # Hospital CRUD
+  pharmacies.ts         # Pharmacy CRUD
+  labResults.ts         # Lab result management
+  auditLogs.ts          # Audit trail
+  triage.ts             # Claude AI integration
+  auth.config.ts        # Clerk JWT auth config
+```
+
+## Roles
+
+| Role | Description |
+|---|---|
+| `PATIENT` | View own records, book appointments, track vitals |
+| `DOCTOR` | Manage appointments, review patients, respond to consultations |
+| `NURSE` | Record vitals, manage assigned patients |
+| `RURAL_HO` | Register patients, perform triage, request specialist consultations |
+| `ADMIN` | Approve users, manage hospitals/pharmacies, view audit logs |
