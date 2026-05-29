@@ -10,7 +10,72 @@ import AppointmentsSection from "./AppointmentsSection";
 import MedicalRecordsSection from "./MedicalRecordsSection";
 import ConsultationsSection from "./ConsultationsSection";
 import Link from "next/link";
+import Image from "next/image";
+import { useTheme } from "next-themes";
+import {
+  Sidebar,
+  SidebarBody,
+  SidebarLink,
+} from "@/components/ui/sidebar";
+import {
+  IconLayoutDashboard,
+  IconUserSearch,
+  IconCalendar,
+  IconClipboardText,
+  IconMessage2,
+  IconLogout,
+  IconSettings,
+} from "@tabler/icons-react";
+import { motion } from "motion/react";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
+
+const Logo = () => {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return <div className="h-10 w-32" />;
+
+  return (
+    <Link
+      href="/"
+      className="relative z-20 flex items-center space-x-3 py-1 text-sm font-normal"
+    >
+      <Image
+        src={resolvedTheme === "dark" ? "/logo_dark.svg" : "/logo_light.svg"}
+        alt="FMC Logo"
+        width={120}
+        height={32}
+        className="h-8 w-auto"
+        priority
+      />
+    </Link>
+  );
+};
+
+const LogoIcon = () => {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return <div className="h-8 w-8" />;
+
+  return (
+    <Link
+      href="/"
+      className="relative z-20 flex items-center py-1 text-sm font-normal"
+    >
+      <Image
+        src={resolvedTheme === "dark" ? "/logo_dark.svg" : "/logo_light.svg"}
+        alt="FMC Logo"
+        width={32}
+        height={32}
+        className="h-8 w-8 object-left object-cover shrink-0"
+        priority
+      />
+    </Link>
+  );
+};
 
 export default function DashboardPage() {
   const { user } = useUser();
@@ -25,7 +90,58 @@ export default function DashboardPage() {
   const [isAvailable, setIsAvailable] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const links = [
+    {
+      label: "Dashboard",
+      href: "#",
+      icon: (
+        <IconLayoutDashboard className="text-neutral-700 dark:text-neutral-200 h-6 w-6 shrink-0" />
+      ),
+      id: "overview",
+    },
+    {
+      label: "Find Doctors",
+      href: "#",
+      icon: (
+        <IconUserSearch className="text-neutral-700 dark:text-neutral-200 h-6 w-6 shrink-0" />
+      ),
+      id: "doctors",
+    },
+    {
+      label: "Appointments",
+      href: "#",
+      icon: (
+        <IconCalendar className="text-neutral-700 dark:text-neutral-200 h-6 w-6 shrink-0" />
+      ),
+      id: "appointments",
+    },
+    {
+      label: "Medical Records",
+      href: "#",
+      icon: (
+        <IconClipboardText className="text-neutral-700 dark:text-neutral-200 h-6 w-6 shrink-0" />
+      ),
+      id: "vitals",
+    },
+    {
+      label: "Consultations",
+      href: "#",
+      icon: (
+        <IconMessage2 className="text-neutral-700 dark:text-neutral-200 h-6 w-6 shrink-0" />
+      ),
+      id: "messages",
+    },
+    {
+      label: "Settings",
+      href: "/settings",
+      icon: (
+        <IconSettings className="text-neutral-700 dark:text-neutral-200 h-6 w-6 shrink-0" />
+      ),
+      id: "settings",
+    },
+  ];
 
   const recentAppointments = appointments.slice(0, 3);
 
@@ -101,310 +217,70 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-base flex relative overflow-x-hidden">
-      {/* Mobile Sidebar Overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-brand-secondary/60 backdrop-blur-sm z-[60] lg:hidden transition-all duration-300"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Mobile Sidebar Drawer */}
-      <aside
-        className={`fixed inset-y-0 left-0 w-72 bg-brand-secondary z-[70] lg:hidden transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
-      >
-        <div className="p-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-5 h-5 text-on-primary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  />
-                </svg>
-              </div>
-              <span className="text-xl font-black text-on-primary tracking-tighter">
-                FCN Portal
-              </span>
+    <Sidebar open={open} setOpen={setOpen}>
+      <div className="h-screen bg-brand-base flex overflow-hidden w-full">
+        <SidebarBody className="justify-between gap-10 bg-brand-secondary/5 border-r border-border/10">
+          <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+            <Logo />
+            <div className="mt-8 flex flex-col gap-2">
+              {links.map((link, idx) => (
+                <SidebarLink
+                  key={idx}
+                  link={link}
+                  onClick={(e: any) => {
+                    e.preventDefault();
+                    setActiveTab(link.id);
+                  }}
+                  className={
+                    activeTab === link.id
+                      ? "bg-brand-primary/10 rounded-xl px-2"
+                      : ""
+                  }
+                />
+              ))}
             </div>
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-muted hover:text-on-primary"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
           </div>
-        </div>
-
-        <nav className="flex-1 px-4 space-y-2 mt-4">
-          {[
-            {
-              id: "overview",
-              label: "Dashboard",
-              icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
-            },
-            {
-              id: "doctors",
-              label: "Find Doctors",
-              icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
-            },
-            {
-              id: "appointments",
-              label: "Appointments",
-              icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
-            },
-            {
-              id: "vitals",
-              label: "Medical Records",
-              icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2",
-            },
-            {
-              id: "messages",
-              label: "Consultations",
-              icon: "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z",
-            },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                setActiveTab(item.id);
-                setIsMobileMenuOpen(false);
-              }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
-                activeTab === item.id
-                  ? "bg-brand-primary text-on-primary shadow-lg shadow-brand-primary/20"
-                  : "text-muted hover:text-on-primary hover:bg-surface/5"
-              }`}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d={item.icon}
-                />
-              </svg>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border/5 space-y-4">
-          <div className="bg-surface/5 p-4 rounded-2xl">
-            <p className="text-xs font-bold text-muted uppercase tracking-widest mb-2">
-              Logged in as
-            </p>
-            <p className="text-sm font-bold text-on-primary truncate">
-              {user?.fullName || profile?.name}
-            </p>
-            <p className="text-xs text-brand-primary font-bold mt-1">
-              {profile?.role?.replace("_", " ")}
-            </p>
-          </div>
-          <button
-            onClick={() => {
-              signOut();
-              router.push("/");
-            }}
-            className="w-full flex items-center justify-center space-x-2 py-3 rounded-xl text-brand-secondary hover:bg-brand-secondary/10 font-bold transition-colors"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex w-72 bg-brand-secondary flex-col sticky top-0 h-screen shrink-0">
-        <div className="p-8">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-brand-primary rounded-lg flex items-center justify-center">
-              <svg
-                className="w-5 h-5 text-on-primary"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
+          <div className="flex flex-col gap-4">
+            <div className="bg-surface/5 p-4 rounded-2xl border border-border/5">
+              <p className="text-xs font-bold text-muted uppercase tracking-widest mb-1">
+                Logged in as
+              </p>
+              <p className="text-sm font-bold text-heading dark:text-on-primary truncate">
+                {user?.fullName || profile?.name}
+              </p>
+              <p className="text-xs text-brand-primary font-bold mt-1">
+                {profile?.role?.replace("_", " ")}
+              </p>
             </div>
-            <span className="text-xl font-black text-on-primary tracking-tighter">
-              FCN Portal
-            </span>
-          </div>
-        </div>
-
-        <nav className="flex-1 px-4 space-y-2 mt-4">
-          {[
-            {
-              id: "overview",
-              label: "Dashboard",
-              icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6",
-            },
-            {
-              id: "doctors",
-              label: "Find Doctors",
-              icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z",
-            },
-            {
-              id: "appointments",
-              label: "Appointments",
-              icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
-            },
-            {
-              id: "vitals",
-              label: "Medical Records",
-              icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2",
-            },
-            {
-              id: "messages",
-              label: "Consultations",
-              icon: "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z",
-            },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                if (item.id === "doctors") {
-                  setActiveTab("doctors");
-                  return;
-                }
-                setActiveTab(item.id);
+            <SidebarLink
+              link={{
+                label: "Logout",
+                href: "#",
+                icon: (
+                  <IconLogout className="text-neutral-700 dark:text-neutral-200 h-6 w-6 shrink-0" />
+                ),
               }}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
-                activeTab === item.id
-                  ? "bg-brand-primary text-on-primary shadow-lg shadow-brand-primary/20"
-                  : "text-muted hover:text-on-primary hover:bg-surface/5"
-              }`}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d={item.icon}
-                />
-              </svg>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="p-4 border-t border-border/5 space-y-4">
-          <div className="bg-surface/5 p-4 rounded-2xl">
-            <p className="text-xs font-bold text-muted uppercase tracking-widest mb-2">
-              Logged in as
-            </p>
-            <p className="text-sm font-bold text-on-primary truncate">
-              {user?.fullName || profile?.name}
-            </p>
-            <p className="text-xs text-brand-primary font-bold mt-1">
-              {profile?.role?.replace("_", " ")}
-            </p>
+              onClick={(e: any) => {
+                e.preventDefault();
+                signOut();
+                router.push("/");
+              }}
+            />
           </div>
-          <button
-            onClick={() => {
-              signOut();
-              router.push("/");
-            }}
-            className="w-full flex items-center justify-center space-x-2 py-3 rounded-xl text-brand-secondary hover:bg-brand-secondary/10 font-bold transition-colors"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
+        </SidebarBody>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto h-screen">
-        <header className="bg-surface/70 backdrop-blur-md sticky top-0 z-50 border-b border-border h-20 flex items-center px-4 md:px-8 justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 -ml-2 text-heading hover:bg-surface rounded-xl lg:hidden transition-colors"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16m-7 6h7"
-                />
-              </svg>
-            </button>
-            <h2 className="text-lg md:text-xl font-black text-heading tracking-tight truncate">
-              {activeTab === "overview"
-                ? "Overview"
-                : activeTab === "doctors"
-                  ? "Find Doctors"
-                  : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
-            </h2>
-          </div>
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto h-screen">
+          <header className="bg-surface/70 backdrop-blur-md sticky top-0 z-50 border-b border-border h-20 flex items-center px-4 md:px-8 justify-between">
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg md:text-xl font-black text-heading tracking-tight truncate">
+                {activeTab === "overview"
+                  ? "Overview"
+                  : activeTab === "doctors"
+                    ? "Find Doctors"
+                    : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+              </h2>
+            </div>
 
           <div className="flex items-center gap-3 md:gap-6">
             {profile?.role === "DOCTOR" && (
@@ -1036,5 +912,6 @@ export default function DashboardPage() {
         </div>
       </main>
     </div>
+    </Sidebar>
   );
 }

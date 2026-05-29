@@ -21,7 +21,9 @@ import { HoverExpand_002 } from "@/components/ui/skiper-ui/skiper53";
 import { CTASection } from "@/components/ui/hero-dithering-card";
 import { FooterReveal } from "@/components/footer-reveal";
 import { ShaderAnimation } from "@/components/ui/shader-animation";
+import { Device } from "@/components/device";
 import Image from "next/image";
+
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { CosmicButton } from "@/components/ui/cosmic-button";
@@ -108,7 +110,7 @@ export default function LandingPage() {
               <Show when="signed-out">
                 <button
                   onClick={() => router.push("/sign-in")}
-                  className="px-8 py-3 bg-brand-secondary text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-brand-primary hover:shadow-2xl hover:shadow-brand-primary/20 transition-all shadow-lg"
+                  className="px-8 py-3 bg-zinc-800 dark:bg-zinc-900 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-zinc-900 dark:hover:bg-black hover:shadow-2xl transition-all shadow-lg"
                 >
                   Get Started
                 </button>
@@ -138,7 +140,7 @@ export default function LandingPage() {
                     onClick={() =>
                       router.push(isSignedIn ? "/dashboard" : "/sign-in")
                     }
-                    className="px-12 py-5 bg-brand-secondary text-white font-black rounded-2xl text-lg hover:bg-brand-primary hover:shadow-2xl hover:shadow-brand-primary/30 transition-all flex items-center gap-4 group shadow-xl"
+                    className="px-12 py-5 bg-zinc-800 dark:bg-zinc-900 text-white font-black rounded-2xl text-lg hover:bg-zinc-900 dark:hover:bg-black transition-all flex items-center gap-4 group shadow-xl"
                   >
                     Access Patient Portal
                     <svg
@@ -330,58 +332,109 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+              {/* Intelligent Triage - Featured Module */}
+              <div className="group transition-all duration-500">
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                  {/* Left Column: Device Mockup */}
+                  <div className="w-full md:w-auto flex justify-center shrink-0">
+                    <Device
+                      variant="iphone"
+                      src="/core/AI.jpg"
+                      className="w-[140px] md:w-[160px] h-auto drop-shadow-xl relative z-10 transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+
+                  {/* Right Column: Content */}
+                  <div className="flex-1 space-y-6">
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-black text-brand-primary tracking-[0.3em] uppercase">
+                        Intelligent Triage
+                      </span>
+                      <h3 className="text-2xl md:text-3xl font-black text-heading leading-tight tracking-tight">
+                        AI-Powered Clinical <br />
+                        Decision Support
+                      </h3>
+                      <p className="text-sm text-muted font-medium leading-relaxed">
+                        Our triage engine uses Claude AI to analyze patient
+                        symptoms and flag critical cases for immediate review.
+                      </p>
+                    </div>
+
+                    <ul className="space-y-3">
+                      {[
+                        "Symptom analysis in seconds",
+                        "Severity classification",
+                        "Automatic escalation",
+                      ].map((item, idx) => (
+                        <li
+                          key={idx}
+                          className="flex items-center gap-3 group/item"
+                        >
+                          <div className="w-1.5 h-1.5 rounded-full bg-brand-primary"></div>
+                          <span className="text-xs font-bold text-heading">
+                            {item}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
               {[
-                {
-                  title: "Intelligent Triage",
-                  desc: "Our triage engine uses Claude 3.5 AI to analyze symptoms, providing clinical decision support to staff and flagging critical cases for immediate specialist review.",
-                  icon: "M13 10V3L4 14h7v7l9-11h-7z",
-                  color: "text-brand-primary bg-brand-primary/10",
-                  img: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800",
-                },
                 {
                   title: "Unified Patient Registry",
                   desc: "A single source of truth for every patient. Medical history, chronic conditions, and vital trends are instantly accessible by authorized personnel within the institution.",
                   icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10",
                   color: "text-brand-primary bg-brand-primary/10",
-                  img: "https://images.unsplash.com/photo-1504813184591-01592fd03cf7?auto=format&fit=crop&q=80&w=800",
+                  img: "/core/lab-result.jpg",
                 },
               ].map((service, i) => (
-                <div
-                  key={i}
-                  className="group bg-surface rounded-[3rem] border border-border overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-brand-primary/5 transition-all duration-500"
-                >
-                  <div className="h-64 overflow-hidden">
-                    <img
-                      src={service.img}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      alt={service.title}
-                    />
-                  </div>
-                  <div className="p-12 space-y-6">
-                    <div
-                      className={`w-14 h-14 ${service.color} rounded-2xl flex items-center justify-center shadow-lg`}
-                    >
-                      <svg
-                        className="w-8 h-8"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d={service.icon}
-                        />
-                      </svg>
+                <div key={i} className="group transition-all duration-500">
+                  <div className="flex flex-col md:flex-row items-center gap-8">
+                    <div className="w-full md:w-auto flex justify-center shrink-0">
+                      <Device
+                        variant="ipad"
+                        src={service.img}
+                        className="w-[180px] md:w-[200px] h-auto drop-shadow-xl relative z-10 transition-transform duration-500 group-hover:scale-105"
+                      />
                     </div>
-                    <h3 className="text-3xl font-black text-heading">
-                      {service.title}
-                    </h3>
-                    <p className="text-muted font-medium leading-relaxed">
-                      {service.desc}
-                    </p>
+                    <div className="flex-1 space-y-6">
+                      <div className="space-y-3">
+                        <span className="text-[10px] font-black text-brand-primary tracking-[0.3em] uppercase">
+                          Cloud Registry
+                        </span>
+                        <h3 className="text-2xl md:text-3xl font-black text-heading leading-tight tracking-tight">
+                          {service.title}
+                        </h3>
+                        <p className="text-sm text-muted font-medium leading-relaxed">
+                          {service.desc}
+                        </p>
+                      </div>
+                      <div className="pt-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-brand-primary/10 flex items-center justify-center">
+                            <svg
+                              className="w-4 h-4 text-brand-primary"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2.5}
+                                d={service.icon}
+                              />
+                            </svg>
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-heading">
+                            Institutional Standard
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
