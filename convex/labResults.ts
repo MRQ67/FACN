@@ -2,7 +2,7 @@ import { v, ConvexError } from "convex/values";
 import { query, mutation } from "./_generated/server";
 
 export const listByPatient = query({
-  args: { patientId: v.id("patients") },
+  args: { patientId: v.id("users") },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new ConvexError("Not authenticated");
@@ -16,7 +16,7 @@ export const listByPatient = query({
 
 export const create = mutation({
   args: {
-    patientId: v.id("patients"),
+    patientId: v.id("users"),
     testName: v.string(),
     resultValue: v.optional(v.string()),
     unit: v.optional(v.string()),
@@ -47,7 +47,7 @@ export const create = mutation({
 
     const labResultId = await ctx.db.insert("labResults", {
       patientId: args.patientId,
-      doctorId: doctor._id,
+      doctorId: user._id,
       testName: args.testName,
       resultValue: args.resultValue,
       unit: args.unit,
@@ -56,6 +56,43 @@ export const create = mutation({
       completedAt: args.completedAt,
     });
 
-    return await ctx.db.get("labResults", labResultId);
+    return await ctx.db.get(labResultId);
+  },
+});
+
+// TODO: implement api.labResults.getPendingReviewForDoctor
+export const getPendingReviewForDoctor = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    const doctor = await ctx.db
+      .query("users")
+      .withIndex("by_tokenIdentifier", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      )
+      .first();
+    if (!doctor) return [];
+
+    const results = await ctx.db
+      .query("labResults")
+      .withIndex("by_doctorId", (q) => q.eq("doctorId", doctor._id))
+      .filter((q) => q.eq(q.field("status"), "PENDING"))
+      .collect();
+
+    return await Promise.all(
+      results.map(async (r) => {
+        const patient = await ctx.db.get(r.patientId);
+        return { ...r, patientName: patient?.name ?? "Unknown" };
+      })
+    );
+  },
+});
+
+export const acknowledge = mutation({
+  args: { labResultId: v.id("labResults") },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.labResultId, { status: "REVIEWED" });
   },
 });

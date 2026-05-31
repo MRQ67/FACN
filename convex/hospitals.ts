@@ -107,3 +107,11 @@ export const remove = mutation({
     await ctx.db.delete(args.hospitalId);
   },
 });
+
+// TODO: implement api.hospitals.getAllForRHO
+export const getAllForRHO = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query('hospitals').take(50);
+  },
+});

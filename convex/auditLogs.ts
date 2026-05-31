@@ -32,3 +32,11 @@ export const list = query({
     return enriched;
   },
 });
+
+// TODO: implement api.auditLogs.getRecent
+export const getRecent = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("auditLogs").order("desc").take(50);
+  },
+});

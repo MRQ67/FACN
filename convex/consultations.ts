@@ -68,11 +68,46 @@ export const updateStatus = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new ConvexError("Not authenticated");
 
-    const consultation = await ctx.db.get("consultations", args.id);
+    const consultation = await ctx.db.get(args.id);
     if (!consultation) throw new ConvexError("Consultation not found");
 
     await ctx.db.patch("consultations", args.id, { status: args.status });
 
     return { ...consultation, status: args.status };
+  },
+});
+
+// TODO: implement api.consultations.getIncompleteForDoctor
+export const getIncompleteForDoctor = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    const doctor = await ctx.db
+      .query("users")
+      .withIndex("by_tokenIdentifier", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      )
+      .first();
+    if (!doctor) return [];
+
+    return await ctx.db
+      .query("consultations")
+      .withIndex("by_specialistId", (q) =>
+        q.eq("specialistId", doctor._id)
+      )
+      .filter((q) => q.neq(q.field("status"), "COMPLETED"))
+      .collect();
+  },
+});
+
+export const saveNotes = mutation({
+  args: {
+    consultationId: v.id("consultations"),
+    notes: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.consultationId, { notes: args.notes });
   },
 });

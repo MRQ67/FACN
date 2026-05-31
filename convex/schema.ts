@@ -26,7 +26,7 @@ export default defineSchema({
     dateOfBirth: v.number(),
     bloodType: v.optional(v.string()),
     chronicConditions: v.optional(v.string()),
-    assignedNurseId: v.optional(v.id("nurses")),
+    assignedNurseId: v.optional(v.id("users")),
   })
     .index("by_userId", ["userId"])
     .index("by_assignedNurse", ["assignedNurseId"]),
@@ -49,13 +49,13 @@ export default defineSchema({
   nurses: defineTable({
     userId: v.id("users"),
     assignedZone: v.optional(v.string()),
-    supervisorDoctorId: v.optional(v.id("doctors")),
+    supervisorDoctorId: v.optional(v.id("users")),
   })
     .index("by_userId", ["userId"]),
 
   appointments: defineTable({
-    patientId: v.id("patients"),
-    doctorId: v.id("doctors"),
+    patientId: v.id("users"),
+    doctorId: v.id("users"),
     scheduledAt: v.number(),
     status: v.union(
       v.literal("PENDING"),
@@ -72,8 +72,8 @@ export default defineSchema({
     .index("by_status", ["status"]),
 
   vitals: defineTable({
-    patientId: v.id("patients"),
-    nurseId: v.id("nurses"),
+    patientId: v.id("users"),
+    nurseId: v.id("users"),
     bloodPressure: v.string(),
     glucose: v.optional(v.number()),
     heartRate: v.optional(v.number()),
@@ -86,8 +86,8 @@ export default defineSchema({
     .index("by_nurseId", ["nurseId"]),
 
   prescriptions: defineTable({
-    doctorId: v.id("doctors"),
-    patientId: v.id("patients"),
+    doctorId: v.id("users"),
+    patientId: v.id("users"),
     medications: v.string(),
     notes: v.optional(v.string()),
     expiresAt: v.optional(v.number()),
@@ -118,8 +118,8 @@ export default defineSchema({
     .index("by_userAndRead", ["userId", "isRead"]),
 
   labResults: defineTable({
-    patientId: v.id("patients"),
-    doctorId: v.id("doctors"),
+    patientId: v.id("users"),
+    doctorId: v.id("users"),
     testName: v.string(),
     resultValue: v.optional(v.string()),
     unit: v.optional(v.string()),

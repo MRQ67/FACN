@@ -1,88 +1,95 @@
 import { v, ConvexError } from "convex/values";
-import { action } from "./_generated/server";
+import { action, query, mutation } from "./_generated/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const analyze = action({
   args: {
     symptoms: v.string(),
     bloodPressure: v.optional(v.string()),
     heartRate: v.optional(v.number()),
-    temp: v.optional(v.number()),
+    temperature: v.optional(v.number()),
     oxygenSat: v.optional(v.number()),
-    patientHistory: v.optional(v.string()),
+    medicalHistory: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new ConvexError("Not authenticated");
 
-    const apiKey = process.env.CLAUDE_API_KEY;
-    if (!apiKey) throw new ConvexError("CLAUDE_API_KEY not configured");
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
 
-    let clinicalData = "";
-    if (args.bloodPressure)
-      clinicalData += `\nBlood Pressure: ${args.bloodPressure}`;
-    if (args.heartRate !== undefined)
-      clinicalData += `\nHeart Rate: ${args.heartRate} bpm`;
-    if (args.temp !== undefined)
-      clinicalData += `\nTemperature: ${args.temp}°C`;
-    if (args.oxygenSat !== undefined)
-      clinicalData += `\nOxygen Saturation: ${args.oxygenSat}%`;
-    if (args.patientHistory)
-      clinicalData += `\nPatient History: ${args.patientHistory}`;
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
 
-    const prompt = `You are a medical triage assistant. Analyze the following patient data and provide a triage assessment.
+    const prompt = `You are a clinical triage assistant for a
+telemedicine platform in Dire Dawa, Ethiopia. Analyze the following
+patient information and provide a structured triage assessment.
 
-Symptoms: ${args.symptoms}${clinicalData}
+Patient Symptoms: ${args.symptoms}
+Blood Pressure: ${args.bloodPressure || "Not provided"}
+Heart Rate: ${args.heartRate || "Not provided"} BPM
+Temperature: ${args.temperature || "Not provided"} °C
+Oxygen Saturation: ${args.oxygenSat || "Not provided"}%
+Medical History: ${args.medicalHistory || "None provided"}
 
-Provide a JSON response with:
-- triageLevel: "EMERGENCY" | "URGENT" | "SEMI_URGENT" | "NON_URGENT"
-- summary: A brief summary of the assessment
-- recommendations: Array of recommended actions
-- warningFlags: Array of any concerning findings`;
+Respond in this EXACT JSON format with no markdown, no backticks,
+no extra text — just raw JSON:
+{
+  "severity": "LOW" or "MODERATE" or "CRITICAL",
+  "summary": "2-3 sentence clinical summary of the patient's condition",
+  "recommendation": "Specific actionable recommendation for the healthcare worker",
+  "urgency": "Timeframe for care e.g. Immediate, Within 24 hours, Within 1 week",
+  "flags": ["list", "of", "clinical", "red", "flags", "if", "any"]
+}`;
 
-    const response = await fetch(
-      "https://api.anthropic.com/v1/messages",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1024,
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-        }),
-      },
-    );
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new ConvexError(
-        `Claude API error (${response.status}): ${errorBody}`,
-      );
-    }
-
-    const data = await response.json();
-
+    // Parse the JSON response
     let parsed;
     try {
-      const text = data.content?.[0]?.text || "";
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        parsed = JSON.parse(jsonMatch[0]);
-      } else {
-        parsed = { raw: text };
-      }
+      parsed = JSON.parse(text.trim());
     } catch {
-      parsed = { raw: data.content?.[0]?.text || JSON.stringify(data) };
+      // If JSON parse fails, return a structured fallback
+      parsed = {
+        severity: "MODERATE",
+        summary: text,
+        recommendation: "Please consult with a healthcare professional.",
+        urgency: "Within 24 hours",
+        flags: [],
+      };
     }
 
     return parsed;
+  },
+});
+
+// TODO: implement api.triage.getRecentForPatient
+export const getRecentForPatient = query({
+  args: { patientId: v.id("users") },
+  handler: async (ctx, args) => {
+    return null;
+  },
+});
+
+// TODO: implement api.triage.getAllPendingForNurse
+export const getAllPendingForNurse = query({
+  args: {},
+  handler: async (ctx) => {
+    return [];
+  },
+});
+
+// TODO: implement api.triage.submit
+export const submit = mutation({
+  args: {
+    patientId: v.id("users"),
+    complaint: v.string(),
+    symptoms: v.array(v.string()),
+    severity: v.string(),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    return { success: true };
   },
 });

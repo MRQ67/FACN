@@ -2,7 +2,7 @@ import { v, ConvexError } from "convex/values";
 import { query, mutation } from "./_generated/server";
 
 export const listByPatient = query({
-  args: { patientId: v.id("patients") },
+  args: { patientId: v.id("users") },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new ConvexError("Not authenticated");
@@ -16,7 +16,7 @@ export const listByPatient = query({
 
 export const create = mutation({
   args: {
-    patientId: v.id("patients"),
+    patientId: v.id("users"),
     bloodPressure: v.string(),
     glucose: v.optional(v.number()),
     heartRate: v.optional(v.number()),
@@ -48,7 +48,7 @@ export const create = mutation({
 
     const vitalsId = await ctx.db.insert("vitals", {
       patientId: args.patientId,
-      nurseId: nurse._id,
+      nurseId: user._id,
       bloodPressure: args.bloodPressure,
       glucose: args.glucose,
       heartRate: args.heartRate,
@@ -58,6 +58,32 @@ export const create = mutation({
       triageResult: args.triageResult,
     });
 
-    return await ctx.db.get("vitals", vitalsId);
+    return await ctx.db.get(vitalsId);
+  },
+});
+
+// TODO: implement api.vitals.getOverduePatients
+export const getOverduePatients = query({
+  args: {},
+  handler: async (ctx) => {
+    return [];
+  },
+});
+
+// TODO: implement api.vitals.record
+export const record = mutation({
+  args: {
+    patientId: v.id('patients'),
+    temperature: v.number(),
+    bpSystolic: v.number(),
+    bpDiastolic: v.number(),
+    heartRate: v.number(),
+    oxSaturation: v.number(),
+    respRate: v.number(),
+    weight: v.number(),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    return { success: true };
   },
 });

@@ -2,7 +2,7 @@ import { v, ConvexError } from "convex/values";
 import { query, mutation } from "./_generated/server";
 
 export const listByPatient = query({
-  args: { patientId: v.id("patients") },
+  args: { patientId: v.id("users") },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new ConvexError("Not authenticated");
@@ -16,7 +16,7 @@ export const listByPatient = query({
 
 export const create = mutation({
   args: {
-    patientId: v.id("patients"),
+    patientId: v.id("users"),
     medications: v.string(),
     notes: v.optional(v.string()),
     expiresAt: v.optional(v.number()),
@@ -44,7 +44,7 @@ export const create = mutation({
     if (!doctor) throw new ConvexError("Doctor profile not found");
 
     const prescriptionId = await ctx.db.insert("prescriptions", {
-      doctorId: doctor._id,
+      doctorId: user._id,
       patientId: args.patientId,
       medications: args.medications,
       notes: args.notes,
@@ -52,6 +52,36 @@ export const create = mutation({
       pharmacyId: args.pharmacyId,
     });
 
-    return await ctx.db.get("prescriptions", prescriptionId);
+    return await ctx.db.get(prescriptionId);
+  },
+});
+
+// TODO: implement api.prescriptions.getPendingSignatureForDoctor
+export const getPendingSignatureForDoctor = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    const doctor = await ctx.db
+      .query("users")
+      .withIndex("by_tokenIdentifier", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier)
+      )
+      .first();
+    if (!doctor) return [];
+
+    const prescriptions = await ctx.db
+      .query("prescriptions")
+      .withIndex("by_doctorId", (q) => q.eq("doctorId", doctor._id))
+      .collect();
+
+    return await Promise.all(
+
+      prescriptions.map(async (p) => {
+        const patient = await ctx.db.get(p.patientId);
+        return { ...p, patientName: patient?.name ?? "Unknown" };
+      })
+    );
   },
 });

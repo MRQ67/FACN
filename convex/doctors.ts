@@ -1,6 +1,16 @@
 import { v, ConvexError } from "convex/values";
 import { query, mutation } from "./_generated/server";
 
+export const list = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_role", (q) => q.eq("role", "DOCTOR"))
+      .collect();
+  },
+});
+
 export const listAvailable = query({
   args: { specialty: v.optional(v.string()) },
   handler: async (ctx, args) => {
@@ -21,8 +31,8 @@ export const listAvailable = query({
 
     const result = [];
     for (const doctor of doctors) {
-      const user = await ctx.db.get("users", doctor.userId);
-      const hospital = await ctx.db.get("hospitals", doctor.hospitalId);
+      const user = await ctx.db.get(doctor.userId);
+      const hospital = await ctx.db.get(doctor.hospitalId);
       if (!user || !hospital) continue;
       result.push({
         id: doctor._id,
@@ -41,16 +51,21 @@ export const listAvailable = query({
 });
 
 export const getById = query({
-  args: { doctorId: v.id("doctors") },
+  args: { doctorId: v.id("users") },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
 
-    const doctor = await ctx.db.get("doctors", args.doctorId);
+    const user = await ctx.db.get(args.doctorId);
+    if (!user) return null;
+
+    const doctor = await ctx.db
+      .query("doctors")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .unique();
     if (!doctor) return null;
 
-    const user = await ctx.db.get("users", doctor.userId);
-    const hospital = await ctx.db.get("hospitals", doctor.hospitalId);
+    const hospital = await ctx.db.get(doctor.hospitalId);
 
     return { doctor, user, hospital };
   },

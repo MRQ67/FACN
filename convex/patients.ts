@@ -98,3 +98,14 @@ export const getByUserId = query({
     return patient ?? null;
   },
 });
+
+// TODO: implement api.patients.getAllForDoctor
+export const getAllForDoctor = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_role", (q) => q.eq("role", "PATIENT"))
+      .collect();
+  },
+});

@@ -308,3 +308,19 @@ export const deleteUser = mutation({
     });
   },
 });
+
+// TODO: implement api.users.getSummaryByRole
+export const getSummaryByRole = query({
+  args: {},
+  handler: async (ctx) => {
+    return [];
+  },
+});
+
+// TODO: implement api.users.assignRole
+export const assignRole = mutation({
+  args: { userId: v.id('users'), role: v.string() },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.userId, { role: args.role as any });
+  },
+});
