@@ -1,101 +1,152 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useUser } from '@clerk/nextjs';
-import { useQuery, useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AppointmentsPage() {
   const { user } = useUser();
   const profile = useQuery(api.users.getMe);
-  const appointmentsQuery = useQuery(api.appointments.listMy);
-  const appointments = appointmentsQuery ?? [];
+  const queryAppointments = useQuery(api.appointments.listMy);
+  
+  // Local state for optimistic updates
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Sync state
+  useEffect(() => {
+    if (queryAppointments !== undefined) {
+      setAppointments(queryAppointments);
+      setIsLoading(false);
+    }
+  }, [queryAppointments]);
+
   const updateStatus = useMutation(api.appointments.updateStatus);
+  const cancel = useMutation(api.appointments.cancel);
   const router = useRouter();
 
   const handleStatusUpdate = async (id: string, status: string) => {
+    // Optimistic update
+    setAppointments(prev => prev.map(a => a._id === id ? { ...a, status } : a));
+    
+    // Silent mutation
     try {
-      await updateStatus({ id, status });
-    } catch {
-      alert('Failed to update status');
+      await updateStatus({ appointmentId: id as any, status: status as any });
+    } catch (e) {
+      console.error(e);
     }
   };
 
-  if (!user) return null;
+  const handleCancel = async (id: string) => {
+    // Optimistic remove
+    setAppointments(prev => prev.filter(a => a._id !== id));
+    
+    // Silent mutation
+    try {
+      await cancel({ id: id as any });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  if (!user || isLoading) return <div className="max-w-4xl mx-auto py-12 px-4"><Skeleton className="h-8 w-1/3 mb-8" /><div className="space-y-4"><Skeleton className="h-24 w-full" /><Skeleton className="h-24 w-full" /></div></div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-dark">My Appointments</h1>
-          {profile?.role === 'PATIENT' && (
-            <button 
-              onClick={() => router.push('/doctors')}
-              className="px-4 py-2 bg-primary text-white font-bold rounded-md hover:bg-opacity-90"
+          <h1 className="text-3xl font-bold text-foreground">My Appointments</h1>
+          {profile?.role === "PATIENT" && (
+            <button
+              onClick={() => router.push("/doctors")}
+              className="px-4 py-2 bg-primary text-primary-foreground font-bold rounded-md hover:bg-opacity-90"
             >
               Book New Appointment
             </button>
           )}
         </div>
 
-        {appointmentsQuery === undefined ? (
-          <p className="text-center text-gray-500">Loading appointments...</p>
-        ) : appointments.length === 0 ? (
-          <div className="bg-white p-12 rounded-xl shadow-sm text-center border border-gray-100">
-            <p className="text-gray-500 mb-4">You have no upcoming appointments.</p>
-            {profile?.role === 'PATIENT' && (
-                <button 
-                    onClick={() => router.push('/doctors')}
-                    className="text-primary font-bold hover:underline"
-                >
-                    Find a doctor now &rarr;
-                </button>
-            )}
+        {appointments.length === 0 ? (
+          <div className="bg-card p-12 rounded-xl shadow-sm text-center border border-border">
+            <p className="text-muted-foreground mb-4">
+              You have no upcoming appointments.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
-            {appointments.map((apt) => (
-              <div key={apt.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            {appointments.map((apt: any) => (
+              <div
+                key={apt._id}
+                className="bg-card p-6 rounded-xl shadow-sm border border-border flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+              >
                 <div>
                   <div className="flex items-center space-x-2 mb-1">
-                    <span className={`w-2 h-2 rounded-full ${
-                      apt.status === 'CONFIRMED' ? 'bg-green-500' :
-                      apt.status === 'PENDING' ? 'bg-yellow-500' :
-                      apt.status === 'CANCELLED' ? 'bg-red-500' : 'bg-gray-400'
-                    }`}></span>
-                    <h3 className="font-bold text-dark">
-                        {profile?.role === 'PATIENT' ? `Dr. ${apt.doctor.user.name}` : apt.patient.user.name}
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        apt.status === "CONFIRMED"
+                          ? "bg-green-500"
+                          : apt.status === "PENDING"
+                            ? "bg-yellow-500"
+                            : apt.status === "CANCELLED"
+                              ? "bg-red-500"
+                              : "bg-muted-foreground"
+                      }`}
+                    ></span>
+                    <h3 className="font-bold text-foreground">
+                      {profile?.role === "PATIENT"
+                        ? `Dr. ${apt.doctor.user.name}`
+                        : apt.patient.user.name}
                     </h3>
                   </div>
-                  <p className="text-sm text-gray-600">
-                    📅 {new Date(apt.scheduledAt).toLocaleDateString()} at {new Date(apt.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  <p className="text-sm text-muted-foreground">
+                    📅 {new Date(apt.scheduledAt).toLocaleDateString()} at{" "}
+                    {new Date(apt.scheduledAt).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1 uppercase tracking-wider font-bold">{apt.type.replace('_', ' ')}</p>
+                  <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider font-bold">
+                    {apt.type.replace("_", " ")}
+                  </p>
                 </div>
 
                 <div className="flex items-center space-x-3 w-full md:w-auto">
-                  {profile?.role === 'DOCTOR' && apt.status === 'PENDING' && (
+                  {profile?.role === "DOCTOR" && apt.status === "PENDING" && (
                     <>
-                      <button 
-                        onClick={() => handleStatusUpdate(apt.id, 'CONFIRMED')}
-                        className="flex-1 md:flex-none px-4 py-1.5 bg-green-500 text-white text-xs font-bold rounded-md hover:bg-green-600"
+                      <button
+                        onClick={() => handleStatusUpdate(apt._id, "CONFIRMED")}
+                        className="flex-1 md:flex-none px-4 py-1.5 bg-green-600 text-white text-xs font-bold rounded-md hover:bg-green-700"
                       >
                         Confirm
                       </button>
-                      <button 
-                        onClick={() => handleStatusUpdate(apt.id, 'CANCELLED')}
-                        className="flex-1 md:flex-none px-4 py-1.5 bg-red-100 text-red-600 text-xs font-bold rounded-md hover:bg-red-200"
+                      <button
+                        onClick={() => handleStatusUpdate(apt._id, "CANCELLED")}
+                        className="flex-1 md:flex-none px-4 py-1.5 bg-red-100 text-red-700 text-xs font-bold rounded-md hover:bg-red-200"
                       >
                         Decline
                       </button>
                     </>
                   )}
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
-                    apt.status === 'CONFIRMED' ? 'bg-green-100 text-green-700' :
-                    apt.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-gray-100 text-gray-500'
-                  }`}>
+                  {profile?.role === "PATIENT" && apt.status !== "CANCELLED" && (
+                      <button
+                        onClick={() => handleCancel(apt._id)}
+                        className="flex-1 md:flex-none px-4 py-1.5 bg-red-100 text-red-700 text-xs font-bold rounded-md hover:bg-red-200"
+                      >
+                        Cancel
+                      </button>
+                  )}
+                  <span
+                    className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${
+                      apt.status === "CONFIRMED"
+                        ? "bg-green-100 text-green-700"
+                        : apt.status === "PENDING"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-muted text-muted-foreground"
+                    }`}
+                  >
                     {apt.status}
                   </span>
                 </div>
@@ -105,12 +156,12 @@ export default function AppointmentsPage() {
         )}
 
         <div className="mt-8 text-center">
-            <button 
-                onClick={() => router.push('/dashboard')}
-                className="text-gray-500 text-sm hover:underline"
-            >
-                &larr; Back to Dashboard
-            </button>
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="text-muted-foreground text-sm hover:underline"
+          >
+            &larr; Back to Dashboard
+          </button>
         </div>
       </div>
     </div>
