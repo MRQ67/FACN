@@ -3,14 +3,17 @@
 import { useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useQuery } from 'convex/react';
-import { api } from "../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 import { useRouter } from 'next/navigation';
 
 export default function PrescriptionsPage() {
   const { user } = useUser();
   const me = useQuery(api.users.getMe);
   const patientId = me?.role === 'PATIENT' ? me?.patient?.id : undefined;
-  const prescriptions = useQuery(api.prescriptions.listByPatient, !user ? "skip" : { patientId: patientId || '' });
+  const prescriptions = useQuery(
+    api.prescriptions.listByPatient,
+    patientId ? { patientId: patientId as any } : "skip",
+  );
   const router = useRouter();
 
   const loading = me === undefined || prescriptions === undefined;
