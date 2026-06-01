@@ -12,15 +12,28 @@ export const list = query({
 });
 
 export const listAvailable = query({
-  args: { specialty: v.optional(v.string()) },
+  args: { 
+    specialty: v.optional(v.string()),
+    hospitalId: v.optional(v.id("hospitals")),
+  },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return [];
 
-    let doctors = await ctx.db
-      .query("doctors")
-      .withIndex("by_isAvailable", (q) => q.eq("isAvailable", true))
-      .take(50);
+    let doctors;
+    const hospitalId = args.hospitalId;
+    if (hospitalId) {
+      doctors = await ctx.db
+        .query("doctors")
+        .withIndex("by_hospitalId", (q) => q.eq("hospitalId", hospitalId))
+        .filter((q) => q.eq(q.field("isAvailable"), true))
+        .take(50);
+    } else {
+      doctors = await ctx.db
+        .query("doctors")
+        .withIndex("by_isAvailable", (q) => q.eq("isAvailable", true))
+        .take(50);
+    }
 
     if (args.specialty) {
       const term = args.specialty.toLowerCase();
@@ -36,6 +49,7 @@ export const listAvailable = query({
       if (!user || !hospital) continue;
       result.push({
         id: doctor._id,
+        _id: doctor._id,
         user: { id: user._id, name: user.name, phone: user.phone },
         specialty: doctor.specialty,
         isAvailable: doctor.isAvailable,
@@ -94,7 +108,7 @@ export const updateLocation = mutation({
 
     if (!doctor) throw new ConvexError("Doctor profile not found");
 
-    await ctx.db.patch("doctors", doctor._id, {
+    await ctx.db.patch(doctor._id, {
       lastLat: args.lat,
       lastLng: args.lng,
     });
@@ -126,7 +140,7 @@ export const toggleAvailability = mutation({
 
     if (!doctor) throw new ConvexError("Doctor profile not found");
 
-    await ctx.db.patch("doctors", doctor._id, {
+    await ctx.db.patch(doctor._id, {
       isAvailable: !doctor.isAvailable,
     });
 

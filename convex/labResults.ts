@@ -60,7 +60,6 @@ export const create = mutation({
   },
 });
 
-// TODO: implement api.labResults.getPendingReviewForDoctor
 export const getPendingReviewForDoctor = query({
   args: {},
   handler: async (ctx) => {
@@ -78,7 +77,10 @@ export const getPendingReviewForDoctor = query({
     const results = await ctx.db
       .query("labResults")
       .withIndex("by_doctorId", (q) => q.eq("doctorId", doctor._id))
-      .filter((q) => q.eq(q.field("status"), "PENDING"))
+      .filter((q) => q.or(
+        q.eq(q.field("status"), "PENDING"),
+        q.eq(q.field("status"), "COMPLETED")
+      ))
       .collect();
 
     return await Promise.all(
@@ -90,9 +92,9 @@ export const getPendingReviewForDoctor = query({
   },
 });
 
-export const acknowledge = mutation({
-  args: { labResultId: v.id("labResults") },
+export const acknowledgeResult = mutation({
+  args: { id: v.id("labResults") },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.labResultId, { status: "REVIEWED" });
+    await ctx.db.patch(args.id, { status: "REVIEWED" });
   },
 });

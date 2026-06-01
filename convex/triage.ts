@@ -19,10 +19,10 @@ export const analyze = action({
     if (!apiKey) throw new Error("GEMINI_API_KEY is not set");
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const prompt = `You are a clinical triage assistant for a
-telemedicine platform in Dire Dawa, Ethiopia. Analyze the following
+    const prompt = `You are a clinical triage assistant for a 
+telemedicine platform in Dire Dawa, Ethiopia. Analyze the following 
 patient information and provide a structured triage assessment.
 
 Patient Symptoms: ${args.symptoms}
@@ -32,7 +32,7 @@ Temperature: ${args.temperature || "Not provided"} °C
 Oxygen Saturation: ${args.oxygenSat || "Not provided"}%
 Medical History: ${args.medicalHistory || "None provided"}
 
-Respond in this EXACT JSON format with no markdown, no backticks,
+Respond in this EXACT JSON format with no markdown, no backticks, 
 no extra text — just raw JSON:
 {
   "severity": "LOW" or "MODERATE" or "CRITICAL",
@@ -44,7 +44,7 @@ no extra text — just raw JSON:
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
-
+    
     // Parse the JSON response
     let parsed;
     try {
@@ -56,7 +56,7 @@ no extra text — just raw JSON:
         summary: text,
         recommendation: "Please consult with a healthcare professional.",
         urgency: "Within 24 hours",
-        flags: [],
+        flags: []
       };
     }
 
@@ -64,23 +64,57 @@ no extra text — just raw JSON:
   },
 });
 
-// TODO: implement api.triage.getRecentForPatient
 export const getRecentForPatient = query({
   args: { patientId: v.id("users") },
   handler: async (ctx, args) => {
-    return null;
+    const vitals = await ctx.db
+      .query("vitals")
+      .withIndex("by_patientId", (q) => q.eq("patientId", args.patientId))
+      .order("desc")
+      .first();
+
+    if (!vitals) return null;
+
+    return {
+      severity: vitals.triageResult ?? "LOW",
+      recommendation: vitals.notes ?? "Regular follow-up recommended.",
+      _creationTime: vitals._creationTime,
+    };
   },
 });
 
-// TODO: implement api.triage.getAllPendingForNurse
 export const getAllPendingForNurse = query({
   args: {},
   handler: async (ctx) => {
-    return [];
+    const patients = await ctx.db
+      .query("users")
+      .withIndex("by_role", (q) => q.eq("role", "PATIENT"))
+      .order("desc")
+      .take(10);
+
+    const result = [];
+    for (const p of patients) {
+      const profile = await ctx.db
+        .query("patients")
+        .withIndex("by_userId", (q) => q.eq("userId", p._id))
+        .unique();
+      
+      const dob = profile?.dateOfBirth ?? 0;
+      const age = dob ? Math.floor((Date.now() - dob) / (365.25 * 24 * 60 * 60 * 1000)) : 0;
+
+      result.push({
+        _id: p._id,
+        name: p.name,
+        age,
+        complaint: "Awaiting assessment",
+        severity: "UNASSESSED",
+        _creationTime: p._creationTime,
+      });
+    }
+    return result;
   },
 });
 
-// TODO: implement api.triage.submit
 export const submit = mutation({
   args: {
     patientId: v.id("users"),

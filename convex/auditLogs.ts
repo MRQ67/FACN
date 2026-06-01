@@ -13,14 +13,16 @@ export const list = query({
 
     const enriched = [];
     for (const log of logs) {
-      const logUser = await ctx.db.get("users", log.userId);
+      const logUser = await ctx.db.get(log.userId);
       enriched.push({
         id: log._id,
+        _id: log._id,
         action: log.action,
         entity: log.entity,
         entityId: log.entityId,
         ipAddress: log.ipAddress,
         timestamp: log._creationTime,
+        _creationTime: log._creationTime,
         user: {
           id: log.userId,
           name: logUser?.name ?? "Unknown",
@@ -33,10 +35,24 @@ export const list = query({
   },
 });
 
-// TODO: implement api.auditLogs.getRecent
 export const getRecent = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("auditLogs").order("desc").take(50);
+    const logs = await ctx.db.query("auditLogs").order("desc").take(50);
+    const enriched = [];
+    for (const log of logs) {
+      const logUser = await ctx.db.get(log.userId);
+      enriched.push({
+        _id: log._id,
+        action: log.action,
+        entity: log.entity,
+        user: {
+          name: logUser?.name ?? "Unknown",
+          role: logUser?.role ?? "Unknown",
+        },
+        _creationTime: log._creationTime,
+      });
+    }
+    return enriched;
   },
 });

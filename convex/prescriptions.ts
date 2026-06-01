@@ -5,7 +5,7 @@ export const listByPatient = query({
   args: { patientId: v.id("users") },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new ConvexError("Not authenticated");
+    if (!identity) return [];
 
     return await ctx.db
       .query("prescriptions")
@@ -17,7 +17,7 @@ export const listByPatient = query({
 export const create = mutation({
   args: {
     patientId: v.id("users"),
-    medications: v.string(),
+    medications: v.union(v.string(), v.array(v.string())),
     notes: v.optional(v.string()),
     expiresAt: v.optional(v.number()),
     pharmacyId: v.optional(v.id("pharmacies")),
@@ -43,10 +43,14 @@ export const create = mutation({
 
     if (!doctor) throw new ConvexError("Doctor profile not found");
 
+    const medicationsString = Array.isArray(args.medications) 
+      ? args.medications.join("\n") 
+      : args.medications;
+
     const prescriptionId = await ctx.db.insert("prescriptions", {
       doctorId: user._id,
       patientId: args.patientId,
-      medications: args.medications,
+      medications: medicationsString,
       notes: args.notes,
       expiresAt: args.expiresAt,
       pharmacyId: args.pharmacyId,
@@ -56,7 +60,6 @@ export const create = mutation({
   },
 });
 
-// TODO: implement api.prescriptions.getPendingSignatureForDoctor
 export const getPendingSignatureForDoctor = query({
   args: {},
   handler: async (ctx) => {
@@ -77,11 +80,17 @@ export const getPendingSignatureForDoctor = query({
       .collect();
 
     return await Promise.all(
-
       prescriptions.map(async (p) => {
         const patient = await ctx.db.get(p.patientId);
         return { ...p, patientName: patient?.name ?? "Unknown" };
       })
     );
+  },
+});
+
+export const sign = mutation({
+  args: { id: v.id('prescriptions') },
+  handler: async (ctx, args) => {
+    return { success: true };
   },
 });

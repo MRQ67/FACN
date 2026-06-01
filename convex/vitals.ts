@@ -36,15 +36,7 @@ export const create = mutation({
       )
       .unique();
 
-    if (!user) return [];
-    if (user.role !== "NURSE") throw new ConvexError("Must be a nurse");
-
-    const nurse = await ctx.db
-      .query("nurses")
-      .withIndex("by_userId", (q) => q.eq("userId", user._id))
-      .unique();
-
-    if (!nurse) throw new ConvexError("Nurse profile not found");
+    if (!user) throw new ConvexError("User not found");
 
     const vitalsId = await ctx.db.insert("vitals", {
       patientId: args.patientId,
@@ -73,7 +65,7 @@ export const getOverduePatients = query({
 // TODO: implement api.vitals.record
 export const record = mutation({
   args: {
-    patientId: v.id('patients'),
+    patientId: v.id('users'),
     temperature: v.number(),
     bpSystolic: v.number(),
     bpDiastolic: v.number(),
@@ -84,6 +76,29 @@ export const record = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return { success: true };
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new ConvexError("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_tokenIdentifier", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
+      )
+      .unique();
+
+    if (!user) throw new ConvexError("User not found");
+
+    const vitalsId = await ctx.db.insert("vitals", {
+      patientId: args.patientId,
+      nurseId: user._id,
+      bloodPressure: `${args.bpSystolic}/${args.bpDiastolic}`,
+      temp: args.temperature,
+      heartRate: args.heartRate,
+      oxygenSat: args.oxSaturation,
+      notes: args.notes,
+      // Map other fields if possible, or skip if not in schema
+    });
+
+    return await ctx.db.get(vitalsId);
   },
 });

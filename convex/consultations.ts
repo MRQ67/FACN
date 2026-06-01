@@ -5,7 +5,7 @@ export const list = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return { asRequester: [], asSpecialist: [] };
+    if (!identity) return [];
 
     const user = await ctx.db
       .query("users")
@@ -14,7 +14,7 @@ export const list = query({
       )
       .unique();
 
-    if (!user) return { asRequester: [], asSpecialist: [] };
+    if (!user) return [];
 
     const asRequester = await ctx.db
       .query("consultations")
@@ -26,7 +26,19 @@ export const list = query({
       .withIndex("by_specialistId", (q) => q.eq("specialistId", user._id))
       .take(50);
 
-    return { asRequester, asSpecialist };
+    const merged = [...asRequester, ...asSpecialist].sort((a, b) => b._creationTime - a._creationTime);
+    
+    // Map to a basic shape expected by the frontend
+    return merged.map(c => ({
+      id: c._id,
+      _id: c._id,
+      status: c.status,
+      notes: c.notes,
+      startedAt: c._creationTime,
+      _creationTime: c._creationTime,
+      requesterId: c.requesterId,
+      specialistId: c.specialistId,
+    }));
   },
 });
 
@@ -55,7 +67,7 @@ export const create = mutation({
       endedAt: undefined,
     });
 
-    return await ctx.db.get("consultations", consultationId);
+    return await ctx.db.get(consultationId);
   },
 });
 
@@ -71,7 +83,7 @@ export const updateStatus = mutation({
     const consultation = await ctx.db.get(args.id);
     if (!consultation) throw new ConvexError("Consultation not found");
 
-    await ctx.db.patch("consultations", args.id, { status: args.status });
+    await ctx.db.patch(args.id, { status: args.status });
 
     return { ...consultation, status: args.status };
   },
@@ -104,10 +116,10 @@ export const getIncompleteForDoctor = query({
 
 export const saveNotes = mutation({
   args: {
-    consultationId: v.id("consultations"),
+    id: v.id("consultations"),
     notes: v.string(),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.consultationId, { notes: args.notes });
+    await ctx.db.patch(args.id, { notes: args.notes });
   },
 });

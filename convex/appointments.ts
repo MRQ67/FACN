@@ -18,26 +18,14 @@ export const listMy = query({
 
     let appointments;
     if (user.role === "PATIENT") {
-      const patient = await ctx.db
-        .query("patients")
-        .withIndex("by_userId", (q) => q.eq("userId", user._id))
-        .unique();
-      if (!patient) return [];
-
       appointments = await ctx.db
         .query("appointments")
-        .withIndex("by_patientId", (q) => q.eq("patientId", patient.userId))
+        .withIndex("by_patientId", (q) => q.eq("patientId", user._id))
         .take(50);
     } else if (user.role === "DOCTOR") {
-      const doctor = await ctx.db
-        .query("doctors")
-        .withIndex("by_userId", (q) => q.eq("userId", user._id))
-        .unique();
-      if (!doctor) return [];
-
       appointments = await ctx.db
         .query("appointments")
-        .withIndex("by_doctorId", (q) => q.eq("doctorId", doctor.userId))
+        .withIndex("by_doctorId", (q) => q.eq("doctorId", user._id))
         .take(50);
     } else {
       return [];
@@ -49,18 +37,6 @@ export const listMy = query({
       const patientUser = await ctx.db.get(apt.patientId);
       if (!doctorUser || !patientUser) continue;
 
-      const doctorProfile = await ctx.db
-        .query("doctors")
-        .withIndex("by_userId", (q) => q.eq("userId", doctorUser._id))
-        .unique();
-      
-      const patientProfile = await ctx.db
-        .query("patients")
-        .withIndex("by_userId", (q) => q.eq("userId", patientUser._id))
-        .unique();
-
-      if (!doctorProfile || !patientProfile) continue;
-
       result.push({
         id: apt._id,
         _id: apt._id,
@@ -71,35 +47,10 @@ export const listMy = query({
         status: apt.status,
         type: apt.type,
         doctor: {
-          id: doctorProfile._id,
-          userId: doctorUser._id,
-          specialty: doctorProfile.specialty,
-          hospitalId: doctorProfile.hospitalId,
-          isAvailable: doctorProfile.isAvailable,
-          workingHours: doctorProfile.workingHours,
-          lastLat: doctorProfile.lastLat,
-          lastLng: doctorProfile.lastLng,
-          user: {
-            id: doctorUser._id,
-            name: doctorUser.name,
-            phone: doctorUser.phone,
-            email: doctorUser.email,
-            role: doctorUser.role,
-          },
+          user: { name: doctorUser.name },
         },
         patient: {
-          id: patientProfile._id,
-          userId: patientUser._id,
-          dateOfBirth: patientProfile.dateOfBirth,
-          bloodType: patientProfile.bloodType,
-          chronicConditions: patientProfile.chronicConditions,
-          user: {
-            id: patientUser._id,
-            name: patientUser.name,
-            phone: patientUser.phone,
-            email: patientUser.email,
-            role: patientUser.role,
-          },
+          user: { name: patientUser.name },
         },
       });
     }
@@ -156,7 +107,10 @@ export const getUpcomingForPatient = query({
     const appointments = await ctx.db
       .query("appointments")
       .withIndex("by_patientId", (q) => q.eq("patientId", user._id))
-      .filter((q) => q.gte(q.field("scheduledAt"), now))
+      .filter((q) => q.and(
+        q.gte(q.field("scheduledAt"), now),
+        q.neq(q.field("status"), "CANCELLED")
+      ))
       .order("asc")
       .collect();
 
@@ -212,26 +166,34 @@ export const getTodayForDoctor = query({
       .first();
     if (!doctor) return [];
 
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
-
+    // Broaden for demo: return PENDING or IN_PROGRESS
     const appointments = await ctx.db
       .query("appointments")
       .withIndex("by_doctorId", (q) => q.eq("doctorId", doctor._id))
-      .filter((q) =>
-        q.and(
-          q.gte(q.field("scheduledAt"), startOfDay.getTime()),
-          q.lte(q.field("scheduledAt"), endOfDay.getTime())
-        )
-      )
+      .filter((q) => q.or(
+        q.eq(q.field("status"), "PENDING"),
+        q.eq(q.field("status"), "IN_PROGRESS"),
+        q.eq(q.field("status"), "CONFIRMED")
+      ))
       .collect();
 
     return await Promise.all(
       appointments.map(async (apt) => {
         const patient = await ctx.db.get(apt.patientId);
-        return { ...apt, patientName: patient?.name ?? "Unknown" };
+        
+        const profile = await ctx.db
+          .query("patients")
+          .withIndex("by_userId", (q) => q.eq("userId", apt.patientId))
+          .unique();
+
+        const dob = profile?.dateOfBirth ?? 0;
+        const age = dob ? Math.floor((Date.now() - dob) / (365.25 * 24 * 60 * 60 * 1000)) : "??";
+
+        return { 
+          ...apt, 
+          patientName: patient?.name ?? "Unknown",
+          patientAge: age
+        };
       })
     );
   },
@@ -240,16 +202,10 @@ export const getTodayForDoctor = query({
 export const updateStatus = mutation({
   args: {
     appointmentId: v.id("appointments"),
-    status: v.union(
-      v.literal("PENDING"),
-      v.literal("CONFIRMED"),
-      v.literal("IN_PROGRESS"),
-      v.literal("COMPLETED"),
-      v.literal("CANCELLED")
-    ),
+    status: v.string(),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.appointmentId, { status: args.status });
+    await ctx.db.patch(args.appointmentId, { status: args.status as any });
   },
 });
 

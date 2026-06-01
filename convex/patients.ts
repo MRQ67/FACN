@@ -66,6 +66,7 @@ export const listPatients = query({
       if (patient) {
         result.push({
           id: patient._id,
+          _id: patient._id,
           userId: patientUser._id,
           dateOfBirth: patient.dateOfBirth,
           bloodType: patient.bloodType,
@@ -84,28 +85,68 @@ export const listPatients = query({
   },
 });
 
-export const getByUserId = query({
-  args: { userId: v.id("users") },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return null;
+export const getAllForArea = query({
+  args: {},
+  handler: async (ctx) => {
+    const patientUsers = await ctx.db
+      .query("users")
+      .withIndex("by_role", (q) => q.eq("role", "PATIENT"))
+      .take(20);
 
-    const patient = await ctx.db
-      .query("patients")
-      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
-      .unique();
-
-    return patient ?? null;
+    const result = [];
+    for (const pu of patientUsers) {
+      const patient = await ctx.db
+        .query("patients")
+        .withIndex("by_userId", (q) => q.eq("userId", pu._id))
+        .unique();
+      if (patient) {
+        result.push({
+          _id: patient._id,
+          userId: pu._id,
+          dateOfBirth: patient.dateOfBirth,
+          bloodType: patient.bloodType,
+          chronicConditions: patient.chronicConditions,
+          user: {
+            id: pu._id,
+            name: pu.name,
+            phone: pu.phone,
+            email: pu.email,
+          },
+        });
+      }
+    }
+    return result;
   },
 });
 
-// TODO: implement api.patients.getAllForDoctor
 export const getAllForDoctor = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    const patientUsers = await ctx.db
       .query("users")
       .withIndex("by_role", (q) => q.eq("role", "PATIENT"))
-      .collect();
+      .take(30);
+
+    const result = [];
+    for (const u of patientUsers) {
+      const patient = await ctx.db
+        .query("patients")
+        .withIndex("by_userId", (q) => q.eq("userId", u._id))
+        .unique();
+
+      result.push({
+        _id: u._id,
+        name: u.name,
+        age: patient?.dateOfBirth
+          ? new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear()
+          : null,
+        activeConditions: patient?.chronicConditions ?? "No known conditions",
+        lastVisit: u._creationTime,
+      });
+    }
+    return result;
   },
 });
