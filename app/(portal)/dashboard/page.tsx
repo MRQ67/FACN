@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useUser, UserButton } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
@@ -11,14 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetFooter,
 } from "@/components/ui/sheet";
 import {
   Dialog,
@@ -30,7 +27,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Bell, Menu, Search, X, Check, Clock, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import {
+  Activity,
+  Clock,
+  FileText,
+  FlaskConical,
+  Heart,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 
 // --- HELPERS ---
 
@@ -72,6 +78,65 @@ const getUrgencyClass = (severity?: string) => {
 
 // --- COMMON COMPONENTS ---
 
+const EmptyState = ({
+  icon,
+  title,
+  description,
+  action,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  action?: React.ReactNode;
+}) => (
+  <div className="flex flex-col items-center justify-center py-12 px-6 text-center gap-3">
+    <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center text-muted-foreground">
+      {icon}
+    </div>
+    <div>
+      <p className="text-sm font-semibold text-foreground">{title}</p>
+      <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+    </div>
+    {action}
+  </div>
+);
+
+const SectionCard = ({
+  title,
+  count,
+  rightSlot,
+  children,
+}: {
+  title: string;
+  count?: number;
+  rightSlot?: React.ReactNode;
+  children: React.ReactNode;
+}) => (
+  <section className="bg-surface border border-border rounded-2xl overflow-hidden">
+    <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+          {title}
+        </h2>
+        {typeof count === "number" && count > 0 && (
+          <span className="text-[10px] font-black bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded-full">
+            {count}
+          </span>
+        )}
+      </div>
+      {rightSlot}
+    </div>
+    <div className="divide-y divide-border">{children}</div>
+  </section>
+);
+
+const CountBadge = ({ value }: { value: number }) =>
+  value > 0 ? (
+    <span className="text-[10px] font-black bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded-full">
+      {value}
+    </span>
+  ) : null;
+
 const LoadingState = () => (
   <div className="space-y-3">
     <Skeleton className="h-4 w-3/4" />
@@ -79,54 +144,6 @@ const LoadingState = () => (
     <Skeleton className="h-4 w-2/3" />
   </div>
 );
-
-const NavLinks = ({
-  role,
-  mobile = false,
-}: {
-  role: string;
-  mobile?: boolean;
-}) => {
-  const links = useMemo(() => {
-    const items = [
-      { label: "Patients", href: "/patients" },
-      { label: "Appointments", href: "/appointments" },
-      { label: "Prescriptions", href: "/prescriptions" },
-      { label: "Lab Results", href: "/lab" },
-    ];
-    if (role === "ADMIN") {
-      items.push(
-        { label: "Users", href: "/admin/users" },
-        { label: "Hospitals", href: "/admin/hospitals" },
-        { label: "Audit Logs", href: "/admin/audit-logs" },
-      );
-    }
-    if (role === "NURSE" || role === "DOCTOR") {
-      items.unshift({ label: "Triage", href: "/triage" });
-    }
-    return items;
-  }, [role]);
-
-  return (
-    <nav
-      className={
-        mobile
-          ? "flex flex-col gap-4 mt-8"
-          : "hidden md:flex items-center gap-6"
-      }
-    >
-      {links.map((l) => (
-        <Link
-          key={l.href}
-          href={l.href}
-          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {l.label}
-        </Link>
-      ))}
-    </nav>
-  );
-};
 
 // --- DOCTOR LAYOUT ---
 
@@ -140,142 +157,165 @@ const DoctorDashboard = ({ user }: { user: any }) => {
   const [searchQuery, setSearchSearchQuery] = useState("");
   const filteredPatients = useMemo(() => {
     return myPatients
-      .filter((p) => p.name?.toLowerCase().includes(searchQuery.toLowerCase()))
+      .filter((p: any) => p.name?.toLowerCase().includes(searchQuery.toLowerCase()))
       .slice(0, 20);
   }, [myPatients, searchQuery]);
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-6">
       {/* TODAY'S QUEUE */}
-      <section>
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
-          Today's Queue
-        </h2>
-        <div className="divide-y divide-border border-t border-border">
-          {todayQueue.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No appointments scheduled for today
-            </p>
-          ) : (
-            todayQueue.map((apt: any) => (
-              <div
-                key={apt._id}
-                className={`flex items-center justify-between py-4 ${getUrgencyClass(apt.severity)}`}
+      <SectionCard title="Today's Queue" count={todayQueue.length}>
+        {todayQueue.length === 0 ? (
+          <EmptyState
+            icon={<Clock className="w-5 h-5" />}
+            title="Queue is clear"
+            description="No appointments scheduled today"
+          />
+        ) : (
+          todayQueue.map((apt: any) => (
+            <div
+              key={apt._id}
+              className={`flex items-center justify-between py-4 px-6 ${getUrgencyClass(apt.severity)}`}
+            >
+              <Link
+                href={`/patients/${apt.patientId}`}
+                className="flex-1 min-w-0 pr-4"
               >
-                <Link
-                  href={`/patients/${apt.patientId}`}
-                  className="flex-1 min-w-0 pr-4"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium truncate">
-                      {apt.patientName}, {apt.patientAge}y
-                    </span>
-                    {apt.severity && (
-                      <Badge
-                        variant={
-                          apt.severity === "CRITICAL"
-                            ? "destructive"
-                            : "secondary"
-                        }
-                        className="text-[10px] h-4"
-                      >
-                        {apt.severity}
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {apt.complaint}
-                  </p>
-                </Link>
-                <div className="flex items-center gap-4">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    {formatTime(apt.scheduledAt)}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium truncate">
+                    {apt.patientName}, {apt.patientAge}y
                   </span>
-                  <Badge variant="outline" className="text-[10px]">
-                    {apt.status}
-                  </Badge>
-                  <div className="flex gap-2">
-                    <DoctorStartAction appointment={apt} />
-                    <DoctorNotesAction appointment={apt} />
-                  </div>
+                  {apt.severity && (
+                    <Badge
+                      variant={
+                        apt.severity === "CRITICAL"
+                          ? "destructive"
+                          : "secondary"
+                      }
+                      className="text-[10px] h-4"
+                    >
+                      {apt.severity}
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {apt.complaint}
+                </p>
+              </Link>
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {formatTime(apt.scheduledAt)}
+                </span>
+                <Badge variant="outline" className="text-[10px]">
+                  {apt.status}
+                </Badge>
+                <div className="flex gap-2">
+                  <DoctorStartAction appointment={apt} />
+                  <DoctorNotesAction appointment={apt} />
                 </div>
               </div>
-            ))
-          )}
-        </div>
-      </section>
+            </div>
+          ))
+        )}
+      </SectionCard>
 
       {/* PENDING ACTIONS */}
-      <section>
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
-          Pending Actions
-        </h2>
-        <div className="space-y-4">
+      <SectionCard title="Pending Actions">
+        <div className="px-6 py-5 space-y-6">
           {/* Lab Review */}
           <div className="space-y-1">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase">
-              Lab Results
-            </p>
-            {pendingLab.map((res: any) => (
-              <div
-                key={res._id}
-                className="flex items-center justify-between py-2 border-b border-border last:border-0 pl-3"
-              >
-                <div className="text-sm">
-                  <span className="font-medium">{res.patientName}</span>
-                  <span className="mx-2 text-muted-foreground">•</span>
-                  <span className="text-muted-foreground">{res.testName}</span>
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                Lab Results
+              </p>
+              <CountBadge value={pendingLab.length} />
+            </div>
+            {pendingLab.length === 0 ? (
+              <EmptyState
+                icon={<FlaskConical className="w-5 h-5" />}
+                title="All reviewed"
+                description="No lab results awaiting review"
+              />
+            ) : (
+              pendingLab.map((res: any) => (
+                <div
+                  key={res._id}
+                  className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                >
+                  <div className="text-sm">
+                    <span className="font-medium">{res.patientName}</span>
+                    <span className="mx-2 text-muted-foreground">•</span>
+                    <span className="text-muted-foreground">{res.testName}</span>
+                  </div>
+                  <LabReviewAction result={res} />
                 </div>
-                <LabReviewAction result={res} />
-              </div>
-            ))}
+              ))
+            )}
           </div>
           {/* Prescription Signing */}
           <div className="space-y-1 pt-4">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase">
-              Prescriptions
-            </p>
-            {pendingScripts.map((script: any) => (
-              <div
-                key={script._id}
-                className="flex items-center justify-between py-2 border-b border-border last:border-0 pl-3"
-              >
-                <div className="text-sm">
-                  <span className="font-medium">{script.patientName}</span>
-                  <span className="mx-2 text-muted-foreground">•</span>
-                  <span className="text-muted-foreground">
-                    {script.medication}
-                  </span>
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase">
+                Prescriptions
+              </p>
+              <CountBadge value={pendingScripts.length} />
+            </div>
+            {pendingScripts.length === 0 ? (
+              <EmptyState
+                icon={<FileText className="w-5 h-5" />}
+                title="Nothing to sign"
+                description="No prescriptions pending your signature"
+              />
+            ) : (
+              pendingScripts.map((script: any) => (
+                <div
+                  key={script._id}
+                  className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                >
+                  <div className="text-sm">
+                    <span className="font-medium">{script.patientName}</span>
+                    <span className="mx-2 text-muted-foreground">•</span>
+                    <span className="text-muted-foreground">
+                      {script.medication}
+                    </span>
+                  </div>
+                  <PrescriptionSignAction script={script} />
                 </div>
-                <PrescriptionSignAction script={script} />
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
-      </section>
+      </SectionCard>
 
       {/* MY PATIENTS */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xs uppercase tracking-widest text-muted-foreground">
-            My Patients
-          </h2>
+      <SectionCard
+        title="My Patients"
+        count={myPatients.length}
+        rightSlot={
           <Input
             placeholder="Search patients..."
             className="h-8 w-48 text-xs bg-transparent border-border"
             value={searchQuery}
             onChange={(e) => setSearchSearchQuery(e.target.value)}
           />
-        </div>
-        <div className="divide-y divide-border border-t border-border">
-          {filteredPatients.map((p: any) => (
+        }
+      >
+        {filteredPatients.length === 0 ? (
+          <EmptyState
+            icon={<Users className="w-5 h-5" />}
+            title="No patients yet"
+            description="Patients assigned to you will appear here"
+          />
+        ) : (
+          filteredPatients.map((p: any) => (
             <div
               key={p._id}
-              className="flex items-center justify-between py-3 pl-3"
+              className="flex items-center justify-between py-3 px-6"
             >
               <div>
                 <p className="text-sm font-medium">
-                  {p.name}, {p.age}
+                  {p.name}
+                  {p.age ? `, ${p.age}y` : ""}
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">
                   {p.activeConditions}
@@ -293,9 +333,9 @@ const DoctorDashboard = ({ user }: { user: any }) => {
                 </Link>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
+          ))
+        )}
+      </SectionCard>
     </div>
   );
 };
@@ -310,7 +350,7 @@ const DoctorStartAction = ({ appointment }: { appointment: any }) => {
   const handleStatus = async (status: string) => {
     setSaving(true);
     try {
-      await updateStatus({ id: appointment._id, status: status as any });
+      await updateStatus({ appointmentId: appointment._id, status: status as any });
       setOpen(false);
     } catch (e) {
       console.error(e);
@@ -394,7 +434,6 @@ const DoctorNotesAction = ({ appointment }: { appointment: any }) => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Stub call - appointment._id used as placeholder for consultation ID
       await saveNotes({ id: appointment._id as any, notes });
       setOpen(false);
     } catch (e) {
@@ -412,11 +451,11 @@ const DoctorNotesAction = ({ appointment }: { appointment: any }) => {
             size="sm"
             variant="ghost"
             className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground"
+            onClick={() => setOpen(true)}
           >
             Notes
           </Button>
         }
-        onClick={() => setOpen(true)}
       />
       <DialogContent>
         <DialogHeader>
@@ -566,17 +605,20 @@ const NurseDashboard = ({ user }: { user: any }) => {
   const admittedPatients = useQuery(api.patients.getAllForArea) ?? [];
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-6">
       {/* TRIAGE QUEUE */}
-      <section>
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
-          Triage Queue
-        </h2>
-        <div className="divide-y divide-border border-t border-border">
-          {triageQueue.map((p: any) => (
+      <SectionCard title="Triage Queue" count={triageQueue.length}>
+        {triageQueue.length === 0 ? (
+          <EmptyState
+            icon={<Activity className="w-5 h-5" />}
+            title="Queue is empty"
+            description="No patients awaiting triage"
+          />
+        ) : (
+          triageQueue.map((p: any) => (
             <div
               key={p._id}
-              className={`flex items-center justify-between py-4 ${getUrgencyClass(p.severity)}`}
+              className={`flex items-center justify-between py-4 px-6 ${getUrgencyClass(p.severity)}`}
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2">
@@ -600,53 +642,53 @@ const NurseDashboard = ({ user }: { user: any }) => {
                 <TriageNowAction patient={p} />
               </div>
             </div>
-          ))}
-        </div>
-      </section>
+          ))
+        )}
+      </SectionCard>
 
       {/* VITALS DUE */}
-      <section>
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
-          Vitals Due
-        </h2>
-        <div className="divide-y divide-border border-t border-border">
-          {vitalsOverdue.length === 0 ? (
-            <p className="py-6 text-sm text-muted-foreground italic">
-              All patients have recent vitals on record
-            </p>
-          ) : (
-            vitalsOverdue.map((p: any) => (
-              <div
-                key={p._id}
-                className="flex items-center justify-between py-3 pl-3"
-              >
-                <div className="text-sm">
-                  <p className="font-medium">{p.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Last recorded: {p.lastRecorded}h ago
-                  </p>
-                </div>
-                <RecordVitalsAction patient={p} />
-              </div>
-            ))
-          )}
-        </div>
-      </section>
-
-      {/* ADMITTED PATIENTS */}
-      <section>
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
-          All Admitted Patients
-        </h2>
-        <div className="divide-y divide-border border-t border-border">
-          {admittedPatients.slice(0, 20).map((p: any) => (
+      <SectionCard title="Vitals Due" count={vitalsOverdue.length}>
+        {vitalsOverdue.length === 0 ? (
+          <EmptyState
+            icon={<Heart className="w-5 h-5" />}
+            title="All vitals recorded"
+            description="No overdue vitals check-ins"
+          />
+        ) : (
+          vitalsOverdue.map((p: any) => (
             <div
               key={p._id}
-              className="flex items-center justify-between py-3 pl-3"
+              className="flex items-center justify-between py-3 px-6"
+            >
+              <div className="text-sm">
+                <p className="font-medium">{p.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  Last recorded: {p.lastRecorded}h ago
+                </p>
+              </div>
+              <RecordVitalsAction patient={p} />
+            </div>
+          ))
+        )}
+      </SectionCard>
+
+      {/* ADMITTED PATIENTS */}
+      <SectionCard title="All Admitted Patients" count={admittedPatients.length}>
+        {admittedPatients.length === 0 ? (
+          <EmptyState
+            icon={<Users className="w-5 h-5" />}
+            title="No patients admitted"
+            description="Admitted patients in your area will appear here"
+          />
+        ) : (
+          admittedPatients.slice(0, 20).map((p: any) => (
+            <div
+              key={p._id}
+              className="flex items-center justify-between py-3 px-6"
             >
               <div className="text-sm">
                 <p className="font-medium">
-                  {p.name}, {p.age}y
+                  {p.user?.name || p.name}, {p.age}y
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Adm: {formatDate(p._creationTime)} • Dr.{" "}
@@ -657,9 +699,9 @@ const NurseDashboard = ({ user }: { user: any }) => {
                 <Link href={`/patients/${p._id}`}>View</Link>
               </Button>
             </div>
-          ))}
-        </div>
-      </section>
+          ))
+        )}
+      </SectionCard>
     </div>
   );
 };
@@ -678,7 +720,7 @@ const TriageNowAction = ({ patient }: { patient: any }) => {
       await submitTriage({
         patientId: patient._id,
         complaint,
-        symptoms: [], // multi-select omitted for brevity
+        symptoms: [],
         severity,
         notes,
       });
@@ -845,18 +887,23 @@ const RecordVitalsAction = ({ patient }: { patient: any }) => {
             disabled={saving}
             onClick={async () => {
               setSaving(true);
-              await record({
-                patientId: patient._id,
-                temperature: vitals.temp,
-                bpSystolic: vitals.sbp,
-                bpDiastolic: vitals.dbp,
-                heartRate: vitals.hr,
-                oxSaturation: vitals.ox,
-                respRate: vitals.rr,
-                weight: vitals.wt,
-              });
-              setSaving(false);
-              setOpen(false);
+              try {
+                await record({
+                  patientId: patient._id,
+                  temperature: vitals.temp,
+                  bpSystolic: vitals.sbp,
+                  bpDiastolic: vitals.dbp,
+                  heartRate: vitals.hr,
+                  oxSaturation: vitals.ox,
+                  respRate: vitals.rr,
+                  weight: vitals.wt,
+                });
+              } catch (e) {
+                console.error(e);
+              } finally {
+                setSaving(false);
+                setOpen(false);
+              }
             }}
           >
             {saving ? "Saving..." : "Save Vitals"}
@@ -872,99 +919,118 @@ const RecordVitalsAction = ({ patient }: { patient: any }) => {
 const PatientDashboard = ({ user }: { user: any }) => {
   const upcoming = useQuery(api.appointments.getUpcomingForPatient) ?? [];
   const recentActivity =
-    useQuery(
-      api.appointments.getAllForPatient,
-      user?.patient?._id ? { patientId: user.patient._id } : undefined,
-    ) ?? [];
+    useQuery(api.appointments.getAllForPatient) ?? [];
   const myDoctors = useQuery(api.doctors.list) ?? [];
-  const lastTriage = useQuery(
-    api.triage.getRecentForPatient,
-    user?.patient?._id ? { patientId: user.patient._id } : undefined,
-  );
+  const lastTriage =
+    useQuery(
+      api.triage.getRecentForPatient,
+      user?._id ? { patientId: user._id } : "skip",
+    ) ?? null;
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-6">
       {/* NEXT APPOINTMENT */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xs uppercase tracking-widest text-muted-foreground">
-            Next Appointment
-          </h2>
-          <PatientBookAction />
-        </div>
-        <div className="border border-border rounded-2xl p-6 bg-zinc-50 dark:bg-zinc-950">
-          {upcoming[0] ? (
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xl font-bold text-heading">
-                  Dr. {upcoming[0].doctorName}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {formatDate(upcoming[0].scheduledAt)} at{" "}
-                  {formatTime(upcoming[0].scheduledAt)}
-                </p>
-                <Badge variant="outline" className="mt-2 text-[10px]">
-                  {upcoming[0].type}
-                </Badge>
-              </div>
-              <PatientCancelAction
-                appointmentId={upcoming[0]?._id}
-                doctorName={upcoming[0]?.doctorName ?? ""}
-              />
-            </div>
-          ) : (
-            <div className="text-center py-4">
-              <p className="text-sm text-muted-foreground mb-4">
-                You have no upcoming appointments
+      <SectionCard
+        title="Next Appointment"
+        count={upcoming.length}
+        rightSlot={<PatientBookAction />}
+      >
+        {upcoming[0] ? (
+          <div className="flex items-center justify-between py-5 px-6">
+            <div>
+              <p className="text-xl font-bold text-heading">
+                Dr. {upcoming[0].doctorName}
               </p>
-              <PatientBookAction
-                trigger={<Button variant="outline">Book an Appointment</Button>}
-              />
+              <p className="text-sm text-muted-foreground">
+                {formatDate(upcoming[0].scheduledAt)} at{" "}
+                {formatTime(upcoming[0].scheduledAt)}
+              </p>
+              <Badge variant="outline" className="mt-2 text-[10px]">
+                {upcoming[0].type}
+              </Badge>
             </div>
-          )}
-        </div>
-      </section>
-
-      {/* MY DOCTORS */}
-      <section>
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
-          My Doctors
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {myDoctors.slice(0, 4).map((d: any) => (
-            <div
-              key={d._id}
-              className="flex items-center justify-between p-4 border border-border rounded-xl"
-            >
-              <div>
-                <p className="text-sm font-medium">Dr. {d.name}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">
-                  {d.role}
-                </p>
-              </div>
+            <PatientCancelAction
+              appointmentId={upcoming[0]?._id}
+              doctorName={upcoming[0]?.doctorName ?? ""}
+            />
+          </div>
+        ) : (
+          <EmptyState
+            icon={<Clock className="w-5 h-5" />}
+            title="No upcoming appointments"
+            description="Book a session with one of your doctors below"
+            action={
               <PatientBookAction
-                doctor={d}
                 trigger={
-                  <Button variant="ghost" size="sm" className="text-[10px]">
-                    Book Follow-up
+                  <Button variant="outline" size="sm" className="mt-1">
+                    Book an Appointment
                   </Button>
                 }
               />
-            </div>
-          ))}
-        </div>
-      </section>
+            }
+          />
+        )}
+      </SectionCard>
+
+      {/* MY DOCTORS */}
+      <SectionCard title="My Doctors" count={myDoctors.length}>
+        {myDoctors.length === 0 ? (
+          <EmptyState
+            icon={<Users className="w-5 h-5" />}
+            title="No doctors yet"
+            description="Your care team will appear here"
+          />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-0">
+            {myDoctors.slice(0, 4).map((d: any) => (
+              <div
+                key={d._id}
+                className="flex items-center justify-between p-5 border-b border-border md:border-b md:last:border-b-0 md:[&:nth-last-child(2)]:border-b-0"
+              >
+                <div>
+                  <p className="text-sm font-medium">Dr. {d.name}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase">
+                    {d.role}
+                  </p>
+                </div>
+                <PatientBookAction
+                  doctor={d}
+                  trigger={
+                    <Button variant="ghost" size="sm" className="text-[10px]">
+                      Book Follow-up
+                    </Button>
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </SectionCard>
 
       {/* RECENT ACTIVITY */}
-      <section>
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
-          Recent Activity
-        </h2>
-        <div className="divide-y divide-border border-t border-border">
-          {recentActivity.slice(0, 15).map((act: any) => (
+      <SectionCard
+        title="Recent Activity"
+        count={recentActivity.length}
+        rightSlot={
+          <Link
+            href="/appointments"
+            className="text-xs font-semibold text-brand-primary hover:underline"
+          >
+            View full history &rarr;
+          </Link>
+        }
+      >
+        {recentActivity.length === 0 ? (
+          <EmptyState
+            icon={<Activity className="w-5 h-5" />}
+            title="No activity yet"
+            description="Your appointments and visits will show up here"
+          />
+        ) : (
+          recentActivity.slice(0, 15).map((act: any) => (
             <div
               key={act._id}
-              className="flex items-center justify-between py-3 pl-3"
+              className="flex items-center justify-between py-3 px-6"
             >
               <div className="flex items-center gap-3">
                 <Badge variant="outline" className="text-[8px] font-black">
@@ -978,52 +1044,39 @@ const PatientDashboard = ({ user }: { user: any }) => {
                 {formatDate(act._creationTime)}
               </span>
             </div>
-          ))}
-        </div>
-        <div className="mt-4 text-right">
-          <Link
-            href="/appointments"
-            className="text-xs font-semibold text-brand-primary hover:underline"
-          >
-            View full history &rarr;
-          </Link>
-        </div>
-      </section>
+          ))
+        )}
+      </SectionCard>
 
       {/* AI TRIAGE */}
-      <section>
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
-          AI Triage
-        </h2>
-        <div className="flex items-center justify-between p-6 border-2 border-dashed border-border rounded-2xl">
-          {lastTriage ? (
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Badge>{lastTriage.severity}</Badge>
-                <span className="text-xs text-muted-foreground">
-                  Result from {formatDate(lastTriage._creationTime)}
-                </span>
-              </div>
-              <p className="text-sm font-medium text-heading mb-4 italic">
-                "{lastTriage.recommendation}"
-              </p>
-              <Button asChild variant="secondary" size="sm">
-                <Link href="/triage">Start New Triage</Link>
-              </Button>
+      <SectionCard title="AI Triage">
+        {lastTriage ? (
+          <div className="p-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Badge>{lastTriage.severity}</Badge>
+              <span className="text-xs text-muted-foreground">
+                Result from {formatDate(lastTriage._creationTime)}
+              </span>
             </div>
-          ) : (
-            <div className="flex-1 flex flex-col md:flex-row items-center justify-between gap-6">
-              <p className="text-sm font-medium text-muted-foreground text-center md:text-left">
-                Not feeling well? Get an instant symptom assessment using our AI
-                engine.
-              </p>
-              <Button asChild>
-                <Link href="/triage">Start AI Triage</Link>
-              </Button>
-            </div>
-          )}
-        </div>
-      </section>
+            <p className="text-sm font-medium text-heading mb-4 italic">
+              "{lastTriage.recommendation}"
+            </p>
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/triage">Start New Triage</Link>
+            </Button>
+          </div>
+        ) : (
+          <div className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+            <p className="text-sm font-medium text-muted-foreground text-center md:text-left">
+              Not feeling well? Get an instant symptom assessment using our AI
+              engine.
+            </p>
+            <Button asChild>
+              <Link href="/triage">Start AI Triage</Link>
+            </Button>
+          </div>
+        )}
+      </SectionCard>
     </div>
   );
 };
@@ -1033,7 +1086,7 @@ const PatientBookAction = ({
   trigger,
 }: {
   doctor?: any;
-  trigger?: React.ReactNode;
+  trigger?: React.ReactElement;
 }) => {
   const book = useMutation(api.appointments.create);
   const doctors = useQuery(api.doctors.list) ?? [];
@@ -1125,13 +1178,18 @@ const PatientBookAction = ({
             disabled={saving}
             onClick={async () => {
               setSaving(true);
-              await book({
-                doctorId: selectedDoc,
-                scheduledAt: Date.now() + 86400000,
-                type: "REMOTE",
-              });
-              setSaving(false);
-              setOpen(false);
+              try {
+                await book({
+                  doctorId: selectedDoc,
+                  scheduledAt: Date.now() + 86400000,
+                  type: "REMOTE",
+                });
+              } catch (e) {
+                console.error(e);
+              } finally {
+                setSaving(false);
+                setOpen(false);
+              }
             }}
           >
             {saving ? "Processing..." : "Confirm Booking"}
@@ -1153,10 +1211,8 @@ const PatientCancelAction = ({
   const [open, setOpen] = useState(false);
 
   const handleCancel = async () => {
-    console.log("appointmentId:", appointmentId);
     try {
-      const result = await cancel({ id: appointmentId as any });
-      console.log("cancel result:", result);
+      await cancel({ id: appointmentId as any });
       setOpen(false);
     } catch (err) {
       console.error("cancel error:", err);
@@ -1200,21 +1256,19 @@ const PatientCancelAction = ({
 // --- RURAL HO LAYOUT ---
 
 const RuralHODashboard = ({ user }: { user: any }) => {
-  const critical = useQuery(api.appointments.getTodayForDoctor) ?? []; // placeholder for critical
+  const todayApts = useQuery(api.appointments.getTodayForDoctor) ?? [];
   const facilities = useQuery(api.hospitals.getAllForRHO) ?? [];
+  const criticalCount = todayApts.filter((c: any) => c.severity === "CRITICAL").length;
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-6">
       {/* AREA OVERVIEW */}
-      <section>
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-6">
-          Area Overview
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <SectionCard title="Area Overview">
+        <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
             { label: "Active Patients", value: 142 },
-            { label: "Critical Cases", value: 4 },
-            { label: "Facilities Reporting", value: 12 },
+            { label: "Critical Cases", value: criticalCount },
+            { label: "Facilities Reporting", value: facilities.length },
             { label: "Triage Sessions", value: 38 },
           ].map((stat) => (
             <div key={stat.label} className="flex flex-col gap-1">
@@ -1225,7 +1279,7 @@ const RuralHODashboard = ({ user }: { user: any }) => {
             </div>
           ))}
         </div>
-        <div className="flex flex-wrap gap-3 mt-10">
+        <div className="px-6 pb-6 flex flex-wrap gap-3">
           <Button
             variant="outline"
             size="sm"
@@ -1259,61 +1313,61 @@ const RuralHODashboard = ({ user }: { user: any }) => {
             <Link href="/lab">Lab Results</Link>
           </Button>
         </div>
-      </section>
+      </SectionCard>
 
       {/* CRITICAL CASES */}
-      <section>
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
-          Critical Cases
-        </h2>
-        <div className="divide-y divide-border border-t border-border">
-          {critical.filter((c) => c.severity === "CRITICAL").length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No critical cases at this time
-            </p>
-          ) : (
-            critical
-              .filter((c) => c.severity === "CRITICAL")
-              .map((c: any) => (
-                <div
-                  key={c._id}
-                  className="flex items-center justify-between py-4 border-l-4 border-red-500 pl-3"
-                >
-                  <div>
-                    <p className="text-sm font-medium">
-                      {c.patientName}{" "}
-                      <span className="text-xs text-muted-foreground ml-2">
-                        @{c.facilityName || "Main Center"}
-                      </span>
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {c.complaint}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <span className="text-[10px] text-amber-600 font-bold uppercase">
-                      {c.doctorName ? `Dr. ${c.doctorName}` : "Unassigned"}
+      <SectionCard title="Critical Cases" count={criticalCount}>
+        {criticalCount === 0 ? (
+          <EmptyState
+            icon={<Heart className="w-5 h-5" />}
+            title="No critical cases"
+            description="No critical cases at this time"
+          />
+        ) : (
+          todayApts
+            .filter((c: any) => c.severity === "CRITICAL")
+            .map((c: any) => (
+              <div
+                key={c._id}
+                className="flex items-center justify-between py-4 px-6 border-l-4 border-red-500"
+              >
+                <div>
+                  <p className="text-sm font-medium">
+                    {c.patientName}{" "}
+                    <span className="text-xs text-muted-foreground ml-2">
+                      @{c.facilityName || "Main Center"}
                     </span>
-                    <Button size="sm" variant="ghost" asChild>
-                      <Link href={`/patients/${c.patientId}`}>View</Link>
-                    </Button>
-                  </div>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {c.complaint}
+                  </p>
                 </div>
-              ))
-          )}
-        </div>
-      </section>
+                <div className="flex items-center gap-6">
+                  <span className="text-[10px] text-amber-600 font-bold uppercase">
+                    {c.doctorName ? `Dr. ${c.doctorName}` : "Unassigned"}
+                  </span>
+                  <Button size="sm" variant="ghost" asChild>
+                    <Link href={`/patients/${c.patientId}`}>View</Link>
+                  </Button>
+                </div>
+              </div>
+            ))
+        )}
+      </SectionCard>
 
       {/* FACILITY STATUS */}
-      <section>
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
-          Facility Status
-        </h2>
-        <div className="divide-y divide-border border-t border-border">
-          {facilities.map((f: any) => (
+      <SectionCard title="Facility Status" count={facilities.length}>
+        {facilities.length === 0 ? (
+          <EmptyState
+            icon={<ShieldCheck className="w-5 h-5" />}
+            title="No facilities reporting"
+            description="Partner facilities will appear here"
+          />
+        ) : (
+          facilities.map((f: any) => (
             <div
               key={f._id}
-              className="flex items-center justify-between py-3 pl-3"
+              className="flex items-center justify-between py-3 px-6"
             >
               <Link
                 href={`/patients?facility=${f.name}`}
@@ -1333,9 +1387,9 @@ const RuralHODashboard = ({ user }: { user: any }) => {
                 </Badge>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
+          ))
+        )}
+      </SectionCard>
     </div>
   );
 };
@@ -1343,16 +1397,15 @@ const RuralHODashboard = ({ user }: { user: any }) => {
 // --- ADMIN LAYOUT ---
 
 const AdminDashboard = ({ user }: { user: any }) => {
-  const auditLogs = useQuery(api.auditLog.getRecent) ?? [];
+  const auditLogs = useQuery(api.auditLogs.getRecent) ?? [];
   const [filter, setFilter] = useState("All");
 
   return (
-    <div className="space-y-12">
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xs uppercase tracking-widest text-muted-foreground">
-            System Activity
-          </h2>
+    <div className="space-y-6">
+      <SectionCard
+        title="System Activity"
+        count={auditLogs.length}
+        rightSlot={
           <div className="flex gap-4">
             {["All", "DOCTOR", "NURSE", "PATIENT"].map((role) => (
               <button
@@ -1364,12 +1417,19 @@ const AdminDashboard = ({ user }: { user: any }) => {
               </button>
             ))}
           </div>
-        </div>
-        <div className="divide-y divide-border border-t border-border">
-          {auditLogs.slice(0, 50).map((log: any) => (
+        }
+      >
+        {auditLogs.length === 0 ? (
+          <EmptyState
+            icon={<ShieldCheck className="w-5 h-5" />}
+            title="No activity yet"
+            description="System events will appear here"
+          />
+        ) : (
+          auditLogs.slice(0, 50).map((log: any) => (
             <div
               key={log._id}
-              className="flex items-center justify-between py-3 pl-3"
+              className="flex items-center justify-between py-3 px-6"
             >
               <div className="flex items-center gap-3">
                 <span className="text-[10px] font-bold text-muted-foreground w-32 truncate">
@@ -1384,9 +1444,9 @@ const AdminDashboard = ({ user }: { user: any }) => {
                 {getRelativeTime(log._creationTime)}
               </span>
             </div>
-          ))}
-        </div>
-        <div className="mt-4 text-right">
+          ))
+        )}
+        <div className="px-6 py-3 text-right border-t border-border">
           <Link
             href="/admin/audit-logs"
             className="text-xs font-semibold text-brand-primary hover:underline"
@@ -1394,13 +1454,11 @@ const AdminDashboard = ({ user }: { user: any }) => {
             View all audit logs &rarr;
           </Link>
         </div>
-      </section>
+      </SectionCard>
 
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xs uppercase tracking-widest text-muted-foreground">
-            User Summary
-          </h2>
+      <SectionCard
+        title="User Summary"
+        rightSlot={
           <Button
             size="sm"
             variant="outline"
@@ -1408,33 +1466,29 @@ const AdminDashboard = ({ user }: { user: any }) => {
           >
             + New User
           </Button>
-        </div>
-        <div className="space-y-2">
-          {["PATIENT", "DOCTOR", "NURSE", "RURAL_HO", "ADMIN"].map((role) => (
-            <div
-              key={role}
-              className="flex items-center justify-between p-4 border border-border rounded-xl"
-            >
-              <span className="text-sm font-medium">{role}</span>
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-muted-foreground">24 users</span>
-                <Link
-                  href={`/admin/users?role=${role}`}
-                  className="text-xs font-semibold text-brand-primary hover:underline"
-                >
-                  Manage
-                </Link>
-              </div>
+        }
+      >
+        {["PATIENT", "DOCTOR", "NURSE", "RURAL_HO", "ADMIN"].map((role) => (
+          <div
+            key={role}
+            className="flex items-center justify-between p-4 border-b border-border last:border-0"
+          >
+            <span className="text-sm font-medium">{role}</span>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground">24 users</span>
+              <Link
+                href={`/admin/users?role=${role}`}
+                className="text-xs font-semibold text-brand-primary hover:underline"
+              >
+                Manage
+              </Link>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        ))}
+      </SectionCard>
 
-      <section>
-        <h2 className="text-xs uppercase tracking-widest text-muted-foreground mb-4">
-          Admin Areas
-        </h2>
-        <div className="flex gap-8">
+      <SectionCard title="Admin Areas">
+        <div className="p-6 flex flex-wrap gap-6">
           {["Hospitals", "Pharmacies", "Users", "Audit Logs"].map((area) => (
             <Link
               key={area}
@@ -1445,7 +1499,7 @@ const AdminDashboard = ({ user }: { user: any }) => {
             </Link>
           ))}
         </div>
-      </section>
+      </SectionCard>
     </div>
   );
 };
@@ -1455,76 +1509,39 @@ const AdminDashboard = ({ user }: { user: any }) => {
 export default function DashboardPage() {
   const profile = useQuery(api.users.getMe);
   const { isLoaded, isSignedIn } = useUser();
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted || !isLoaded) return null;
-  if (!isSignedIn) {
-    router.push("/");
-    return null;
-  }
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push("/");
+    }
+  }, [isLoaded, isSignedIn, router]);
 
   if (profile === undefined) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-16">
+      <main className="max-w-6xl mx-auto px-4 py-16">
         <LoadingState />
-      </div>
+      </main>
     );
   }
 
-  if (!profile)
-    return <div>Account sync error. Please try logging in again.</div>;
+  if (!profile) {
+    return (
+      <main className="max-w-6xl mx-auto px-4 py-16">
+        <div className="text-sm text-muted-foreground">
+          Account sync error. Please try logging in again.
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background selection:bg-brand-primary/10">
-      <header className="h-14 border-b border-border sticky top-0 bg-background/80 backdrop-blur-md z-50">
-        <div className="max-w-5xl mx-auto h-full flex items-center justify-between px-4">
-          <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="font-bold text-lg tracking-tighter">FCN</span>
-            </Link>
-            <Separator orientation="vertical" className="h-6" />
-            <Badge
-              variant="outline"
-              className="text-[10px] font-black tracking-widest bg-muted/50 border-border"
-            >
-              {profile.role}
-            </Badge>
-            <NavLinks role={profile.role} />
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Bell className="h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground" />
-            <AnimatedThemeToggler />
-            <UserButton afterSignOutUrl="/" />
-
-            <div className="md:hidden">
-              <Sheet>
-                <SheetTrigger
-                  render={
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Menu className="h-5 w-5" />
-                    </Button>
-                  }
-                />
-                <SheetContent side="right">
-                  <NavLinks role={profile.role} mobile />
-                </SheetContent>
-              </Sheet>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-4 py-12">
-        {profile.role === "DOCTOR" && <DoctorDashboard user={profile} />}
-        {profile.role === "NURSE" && <NurseDashboard user={profile} />}
-        {profile.role === "PATIENT" && <PatientDashboard user={profile} />}
-        {profile.role === "RURAL_HO" && <RuralHODashboard user={profile} />}
-        {profile.role === "ADMIN" && <AdminDashboard user={profile} />}
-      </main>
-    </div>
+    <main className="max-w-6xl mx-auto px-4 py-8">
+      {profile.role === "DOCTOR" && <DoctorDashboard user={profile} />}
+      {profile.role === "NURSE" && <NurseDashboard user={profile} />}
+      {profile.role === "PATIENT" && <PatientDashboard user={profile} />}
+      {profile.role === "RURAL_HO" && <RuralHODashboard user={profile} />}
+      {profile.role === "ADMIN" && <AdminDashboard user={profile} />}
+    </main>
   );
 }
