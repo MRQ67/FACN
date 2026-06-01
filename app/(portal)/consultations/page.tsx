@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useQuery, useMutation } from 'convex/react';
-import { api } from "../../convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 import { useRouter } from 'next/navigation';
 
 export default function ConsultationsPage() {
   const { user } = useUser();
   const me = useQuery(api.users.getMe);
-  const consultations = useQuery(api.consultations.list);
+  const consultations = useQuery(api.consultations.list) ?? [];
   const createConsultation = useMutation(api.consultations.create);
   const updateStatus = useMutation(api.consultations.updateStatus);
   const [activeConsultation, setActiveConsultation] = useState<any>(null);
@@ -38,7 +38,7 @@ export default function ConsultationsPage() {
 
   const handleAssign = useCallback(async (id: string) => {
     try {
-        await updateStatus({ id, status: 'ACTIVE' });
+        await updateStatus({ id: id as any, status: 'ACTIVE' });
         // useQuery will refetch consultations
     } catch (err) {
         alert('Failed to pick up case');
@@ -50,7 +50,7 @@ export default function ConsultationsPage() {
     if (!feedback) return;
 
     try {
-      await updateStatus({ id, status, notes: feedback });
+      await updateStatus({ id: id as any, status });
       if (activeConsultation?.id === id) {
           setActiveConsultation((prev: any) => ({ ...prev, status, notes: feedback }));
       }
