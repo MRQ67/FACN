@@ -108,12 +108,15 @@ export default function LandingPage() {
                 </div>
               </Show>
               <Show when="signed-out">
-                <button
-                  onClick={() => router.push("/sign-in")}
-                  className="px-8 py-3 bg-zinc-800 dark:bg-zinc-900 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-zinc-900 dark:hover:bg-black hover:shadow-2xl transition-all shadow-lg"
-                >
-                  Get Started
-                </button>
+                <div className="flex items-center gap-4">
+                  <CosmicButton
+                    as="button"
+                    onClick={() => router.push("/sign-in")}
+                  >
+                    Get Started
+                  </CosmicButton>
+                  <UserButton />
+                </div>
               </Show>
             </div>
           </div>
