@@ -41,7 +41,7 @@ const NavLinks = ({
         { label: "Audit Logs", href: "/admin/audit-logs" },
       );
     }
-    if (role === "NURSE" || role === "DOCTOR") {
+    if (role === "PATIENT") {
       items.unshift({ label: "Triage", href: "/triage" });
     }
     return items;

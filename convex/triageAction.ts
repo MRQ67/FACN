@@ -1,17 +1,14 @@
 "use node";
 
 import { v, ConvexError } from "convex/values";
-import { action } from "./_generated/server";
+import { action, mutation } from "./_generated/server";
+import { api } from "./_generated/api";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const analyze = action({
   args: {
     symptoms: v.string(),
-    bloodPressure: v.optional(v.string()),
-    heartRate: v.optional(v.number()),
-    temperature: v.optional(v.number()),
-    oxygenSat: v.optional(v.number()),
-    medicalHistory: v.optional(v.string()),
+    patientId: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -25,14 +22,9 @@ export const analyze = action({
 
     const prompt = `You are a clinical triage assistant for a
 telemedicine platform in Dire Dawa, Ethiopia. Analyze the following
-patient information and provide a structured triage assessment.
+patient symptoms and provide a structured triage assessment.
 
 Patient Symptoms: ${args.symptoms}
-Blood Pressure: ${args.bloodPressure || "Not provided"}
-Heart Rate: ${args.heartRate || "Not provided"} BPM
-Temperature: ${args.temperature || "Not provided"} \u00B0C
-Oxygen Saturation: ${args.oxygenSat || "Not provided"}%
-Medical History: ${args.medicalHistory || "None provided"}
 
 Respond in this EXACT JSON format with no markdown, no backticks,
 no extra text \u2014 just raw JSON:
@@ -60,6 +52,38 @@ no extra text \u2014 just raw JSON:
       };
     }
 
+    if (args.patientId) {
+      await ctx.runMutation(api.triageAction.storeTriageResult, {
+        patientId: args.patientId,
+        triageResult: JSON.stringify(parsed),
+        symptoms: args.symptoms,
+      });
+    }
+
     return parsed;
+  },
+});
+
+export const storeTriageResult = mutation({
+  args: {
+    patientId: v.id("users"),
+    triageResult: v.string(),
+    symptoms: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new ConvexError("Not authenticated");
+
+    await ctx.db.insert("vitals", {
+      patientId: args.patientId,
+      nurseId: args.patientId,
+      bloodPressure: "N/A",
+      heartRate: 0,
+      oxygenSat: 0,
+      temp: 0,
+      glucose: 0,
+      triageResult: args.triageResult,
+      notes: args.symptoms,
+    });
   },
 });

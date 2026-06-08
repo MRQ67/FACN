@@ -237,6 +237,23 @@ export default function PatientDetailsPage() {
                                                 <p className="text-sm text-muted italic">{record.notes}</p>
                                             </div>
                                         )}
+                                        {(record.triageResult) && (() => {
+                                            const triage = (() => {
+                                                if (!record.triageResult) return null;
+                                                try { return JSON.parse(record.triageResult); } catch { return null; }
+                                            })();
+                                            if (!triage) return null;
+                                            return (
+                                                <div className={`mt-4 p-4 rounded-2xl border ${triage.severity === "CRITICAL" ? "bg-red-50 border-red-200" : triage.severity === "MODERATE" ? "bg-amber-50 border-amber-200" : "bg-green-50 border-green-200"}`}>
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full text-white ${triage.severity === "CRITICAL" ? "bg-red-600" : triage.severity === "MODERATE" ? "bg-amber-500" : "bg-green-600"}`}>{triage.severity}</span>
+                                                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">AI Triage</span>
+                                                    </div>
+                                                    <p className="text-sm font-bold text-heading mb-1">{triage.summary}</p>
+                                                    <p className="text-xs text-muted-foreground italic">{triage.recommendation}</p>
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
                                 ))}
                                 {(!patient.vitals || patient.vitals.length === 0) && (

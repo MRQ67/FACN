@@ -1,44 +1,49 @@
-"use client";
+'use client';
 
 import { useState } from "react";
-import { useAction } from "convex/react";
+import { useQuery, useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
+import { ShieldX } from "lucide-react";
 
 export default function TriagePage() {
-  const analyzeMutation = useAction(api.triage.analyze);
-  const [formData, setFormData] = useState({
-    symptoms: "",
-    bloodPressure: "",
-    heartRate: "",
-    temp: "",
-    oxygenSat: "",
-    medicalHistory: "",
-  });
+  const profile = useQuery(api.users.getMe);
+  const analyzeAction = useAction(api.triageAction.analyze);
+  const [symptoms, setSymptoms] = useState("");
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  if (profile !== undefined && profile?.role !== "PATIENT") {
+    return (
+      <div className="min-h-screen bg-brand-base flex items-center justify-center p-4">
+        <div className="bg-surface p-12 rounded-[3rem] shadow-sm border border-border max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-brand-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <ShieldX className="w-8 h-8 text-brand-primary" />
+          </div>
+          <h1 className="text-2xl font-black text-heading tracking-tight mb-3">Patients Only</h1>
+          <p className="text-sm text-muted font-medium mb-8 leading-relaxed">
+            AI triage is available for patients. Your doctor can view your triage history from your profile.
+          </p>
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="px-8 py-3.5 bg-brand-primary text-on-primary rounded-2xl font-black shadow-xl shadow-brand-primary/20 hover:scale-105 transition-transform"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async () => {
     setLoading(true);
     setResult(null);
 
     try {
-      const data = await analyzeMutation({
-        symptoms: formData.symptoms,
-        bloodPressure: formData.bloodPressure || undefined,
-        heartRate: formData.heartRate ? parseInt(formData.heartRate) : undefined,
-        temperature: formData.temp ? parseFloat(formData.temp) : undefined,
-        oxygenSat: formData.oxygenSat
-          ? parseFloat(formData.oxygenSat)
-          : undefined,
-        medicalHistory: formData.medicalHistory || undefined,
+      const data = await analyzeAction({
+        symptoms,
+        patientId: profile?._id,
       });
 
       setResult(data as any);
@@ -73,92 +78,25 @@ export default function TriagePage() {
             <div className="space-y-8">
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-muted">
-                  Current Symptoms
+                  Describe your symptoms
                 </label>
                 <textarea
                   name="symptoms"
-                  rows={4}
+                  rows={6}
                   className="w-full p-4 bg-surface border-none rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
-                  placeholder="Describe the symptoms in detail (e.g. Sharp chest pain for 2 hours, difficulty breathing...)"
-                  value={formData.symptoms}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-muted">
-                    Blood Pressure
-                  </label>
-                  <input
-                    type="text"
-                    name="bloodPressure"
-                    placeholder="120/80"
-                    className="w-full p-4 bg-surface border-none rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
-                    value={formData.bloodPressure}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-muted">
-                    Heart Rate (bpm)
-                  </label>
-                  <input
-                    type="number"
-                    name="heartRate"
-                    className="w-full p-4 bg-surface border-none rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
-                    value={formData.heartRate}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-muted">
-                    Temp (°C)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    name="temp"
-                    className="w-full p-4 bg-surface border-none rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
-                    value={formData.temp}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-muted">
-                    Oxygen Sat (%)
-                  </label>
-                  <input
-                    type="number"
-                    name="oxygenSat"
-                    className="w-full p-4 bg-surface border-none rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
-                    value={formData.oxygenSat}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-widest text-muted">
-                  Medical History (Optional)
-                </label>
-                <textarea
-                  name="medicalHistory"
-                  rows={2}
-                  className="w-full p-4 bg-surface border-none rounded-2xl focus:ring-2 focus:ring-brand-primary font-bold text-heading"
-                  placeholder="Known conditions, allergies, or previous treatments..."
-                  value={formData.medicalHistory}
-                  onChange={handleChange}
+                  placeholder="Describe what you're feeling in as much detail as possible. For example: I have had a headache for 2 days, fever, and sore throat..."
+                  value={symptoms}
+                  onChange={(e) => setSymptoms(e.target.value)}
                 />
               </div>
 
               <button
                 type="button"
-                disabled={loading}
+                disabled={loading || !symptoms.trim()}
                 onClick={handleSubmit}
                 className="w-full flex justify-center py-5 px-4 border border-transparent rounded-[1.5rem] shadow-xl shadow-brand-primary/20 text-lg font-black text-on-primary bg-brand-primary hover:scale-[1.02] transition-all disabled:opacity-50"
               >
-                {loading ? "AI Model Processing..." : "Run Triage Analysis ✨"}
+                {loading ? "AI Model Processing..." : "Analyse Symptoms \u2728"}
               </button>
             </div>
           ) : (
