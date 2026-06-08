@@ -9,15 +9,21 @@ import { useRouter } from 'next/navigation';
 export default function LabResultsPage() {
   const { user } = useUser();
   const me = useQuery(api.users.getMe);
-  const patientId = me?.role === 'PATIENT' ? me?.patient?.id : undefined;
-  const results = useQuery(api.labResults.listByPatient, !user ? "skip" : { patientId: patientId || '' });
+  
+  // labResults.patientId is a User ID according to schema
+  const targetUserId = me?.role === 'PATIENT' ? me?._id : undefined;
+  
+  const results = useQuery(
+    api.labResults.listByPatient, 
+    !user || !targetUserId ? "skip" : { patientId: targetUserId }
+  );
   const router = useRouter();
 
   const loading = me === undefined || results === undefined;
 
   useEffect(() => {
     if (!user) {
-        router.push('/login');
+        router.push('/sign-in');
     }
   }, [user, router]);
 
@@ -35,7 +41,7 @@ export default function LabResultsPage() {
         ) : (
           <div className="space-y-6">
             {results.map((r) => (
-              <div key={r.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
+              <div key={r._id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
                 <div>
                   <h3 className="font-bold text-lg text-dark">{r.testName}</h3>
                   <p className="text-sm text-gray-500 mb-2">Ordered by {r.doctor.user.name} on {new Date(r.orderedAt).toLocaleDateString()}</p>

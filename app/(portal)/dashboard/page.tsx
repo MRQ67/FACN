@@ -148,6 +148,22 @@ const LoadingState = () => (
 // --- DOCTOR LAYOUT ---
 
 const DoctorDashboard = ({ user }: { user: any }) => {
+  const toggleAvailability = useMutation(api.doctors.toggleAvailability);
+  const [isToggling, setIsToggling] = useState(false);
+  const isAvailable = user.doctor?.isAvailable ?? false;
+
+  const handleToggle = async () => {
+    setIsToggling(true);
+    try {
+      await toggleAvailability();
+    } catch (e) {
+      console.error(e);
+      alert("Failed to update status. Please try again.");
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
   const todayQueue = useQuery(api.appointments.getTodayForDoctor) ?? [];
   const pendingLab = useQuery(api.labResults.getPendingReviewForDoctor) ?? [];
   const pendingScripts =
@@ -163,6 +179,29 @@ const DoctorDashboard = ({ user }: { user: any }) => {
 
   return (
     <div className="space-y-6">
+      {/* DOCTOR STATUS BAR */}
+      <div className="bg-surface border border-border rounded-2xl p-6 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isAvailable ? 'bg-brand-primary/10 text-brand-primary' : 'bg-muted text-muted-foreground'}`}>
+            <Activity className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-heading leading-none">Welcome, Dr. {user.name.split(' ')[0]}</h1>
+            <p className="text-[10px] text-muted font-bold uppercase tracking-widest mt-1">
+              Status: <span className={isAvailable ? 'text-brand-primary' : 'text-muted-foreground'}>{isAvailable ? 'Active & Available' : 'Offline / Busy'}</span>
+            </p>
+          </div>
+        </div>
+        <Button 
+          onClick={handleToggle}
+          disabled={isToggling}
+          variant={isAvailable ? "outline" : "default"}
+          className={`px-8 py-5 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${isAvailable ? 'border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white' : 'bg-brand-primary text-white shadow-xl shadow-brand-primary/20'}`}
+        >
+          {isToggling ? 'Updating...' : isAvailable ? 'Go Offline' : 'Go Online'}
+        </Button>
+      </div>
+
       {/* TODAY'S QUEUE */}
       <SectionCard title="Today's Queue" count={todayQueue.length}>
         {todayQueue.length === 0 ? (
@@ -1175,20 +1214,26 @@ const PatientBookAction = ({
           </div>
           <Button
             className="w-full mt-4"
-            disabled={saving}
+            disabled={saving || !selectedDoc || !date}
             onClick={async () => {
               setSaving(true);
               try {
+                // Combine date and time into a single timestamp
+                const [year, month, day] = date.split('-').map(Number);
+                const [hours, minutes] = time.split(':').map(Number);
+                const scheduledAt = new Date(year, month - 1, day, hours, minutes).getTime();
+
                 await book({
-                  doctorId: selectedDoc,
-                  scheduledAt: Date.now() + 86400000,
+                  doctorId: selectedDoc as any,
+                  scheduledAt,
                   type: "REMOTE",
                 });
+                setOpen(false);
               } catch (e) {
                 console.error(e);
+                alert("Failed to book appointment. Please try again.");
               } finally {
                 setSaving(false);
-                setOpen(false);
               }
             }}
           >
@@ -1526,11 +1571,10 @@ export default function DashboardPage() {
   }
 
   if (!profile) {
+    router.push("/onboarding");
     return (
       <main className="max-w-6xl mx-auto px-4 py-16">
-        <div className="text-sm text-muted-foreground">
-          Account sync error. Please try logging in again.
-        </div>
+        <LoadingState />
       </main>
     );
   }

@@ -15,8 +15,8 @@ export default function PatientDetailsPage() {
 
     const patientId = id === 'me' ? profile?.patient?.id : (id as string);
     const patient = useQuery(
-      api.users.getPatientById,
-      patientId ? { id: patientId } : 'skip'
+      api.patients.getPatientById,
+      patientId ? { id: patientId as any } : 'skip'
     );
 
     const loading = patient === undefined;

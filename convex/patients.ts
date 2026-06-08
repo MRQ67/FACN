@@ -150,3 +150,77 @@ export const getAllForDoctor = query({
     return result;
   },
 });
+
+export const getPatientById = query({
+  args: { id: v.id("patients") },
+  handler: async (ctx, args) => {
+    const patient = await ctx.db.get(args.id);
+    if (!patient) return null;
+
+    const user = await ctx.db.get(patient.userId);
+    if (!user) return null;
+
+    const vitals = await ctx.db
+      .query("vitals")
+      .withIndex("by_patientId", (q) => q.eq("patientId", patient.userId))
+      .order("desc")
+      .take(10);
+
+    const prescriptions = await ctx.db
+      .query("prescriptions")
+      .withIndex("by_patientId", (q) => q.eq("patientId", patient.userId))
+      .order("desc")
+      .take(10);
+
+    const appointments = await ctx.db
+      .query("appointments")
+      .withIndex("by_patientId", (q) => q.eq("patientId", patient.userId))
+      .order("desc")
+      .take(10);
+
+    // Resolve details for vitals, prescriptions, and appointments
+    const resolvedVitals = [];
+    for (const v of vitals) {
+      const nurseUser = await ctx.db.get(v.nurseId);
+      resolvedVitals.push({
+        ...v,
+        id: v._id,
+        recordedAt: v._creationTime,
+        nurse: { user: { name: nurseUser?.name ?? "Unknown" } },
+      });
+    }
+
+    const resolvedPrescriptions = [];
+    for (const p of prescriptions) {
+      const doctorUser = await ctx.db.get(p.doctorId);
+      resolvedPrescriptions.push({
+        ...p,
+        id: p._id,
+        issuedAt: p._creationTime,
+        doctor: { user: { name: doctorUser?.name ?? "Unknown" } },
+      });
+    }
+
+    const resolvedAppointments = [];
+    for (const a of appointments) {
+      const doctorUser = await ctx.db.get(a.doctorId);
+      resolvedAppointments.push({
+        ...a,
+        id: a._id,
+        doctor: { user: { name: doctorUser?.name ?? "Unknown" } },
+      });
+    }
+
+    return {
+      ...patient,
+      id: patient._id,
+      user: {
+        ...user,
+        id: user._id,
+      },
+      vitals: resolvedVitals,
+      prescriptions: resolvedPrescriptions,
+      appointments: resolvedAppointments,
+    };
+  },
+});
