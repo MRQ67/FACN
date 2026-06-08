@@ -1,7 +1,7 @@
 "use node";
 
 import { v, ConvexError } from "convex/values";
-import { action, mutation } from "./_generated/server";
+import { action } from "./_generated/server";
 import { api } from "./_generated/api";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
@@ -53,7 +53,7 @@ no extra text \u2014 just raw JSON:
     }
 
     if (args.patientId) {
-      await ctx.runMutation(api.triageAction.storeTriageResult, {
+      await ctx.runMutation(api.triage.storeTriageResult, {
         patientId: args.patientId,
         triageResult: JSON.stringify(parsed),
         symptoms: args.symptoms,
@@ -61,29 +61,5 @@ no extra text \u2014 just raw JSON:
     }
 
     return parsed;
-  },
-});
-
-export const storeTriageResult = mutation({
-  args: {
-    patientId: v.id("users"),
-    triageResult: v.string(),
-    symptoms: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new ConvexError("Not authenticated");
-
-    await ctx.db.insert("vitals", {
-      patientId: args.patientId,
-      nurseId: args.patientId,
-      bloodPressure: "N/A",
-      heartRate: 0,
-      oxygenSat: 0,
-      temp: 0,
-      glucose: 0,
-      triageResult: args.triageResult,
-      notes: args.symptoms,
-    });
   },
 });

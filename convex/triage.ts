@@ -52,6 +52,30 @@ export const getAllPendingForNurse = query({
   },
 });
 
+export const storeTriageResult = mutation({
+  args: {
+    patientId: v.id("users"),
+    triageResult: v.string(),
+    symptoms: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new ConvexError("Not authenticated");
+
+    await ctx.db.insert("vitals", {
+      patientId: args.patientId,
+      nurseId: args.patientId,
+      bloodPressure: "N/A",
+      heartRate: 0,
+      oxygenSat: 0,
+      temp: 0,
+      glucose: 0,
+      triageResult: args.triageResult,
+      notes: args.symptoms,
+    });
+  },
+});
+
 export const submit = mutation({
   args: {
     patientId: v.id("users"),
