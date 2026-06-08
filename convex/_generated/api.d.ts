@@ -22,6 +22,7 @@ import type * as pharmacies from "../pharmacies.js";
 import type * as prescriptions from "../prescriptions.js";
 import type * as seed from "../seed.js";
 import type * as triage from "../triage.js";
+import type * as triageAction from "../triageAction.js";
 import type * as users from "../users.js";
 import type * as vitals from "../vitals.js";
 
@@ -46,6 +47,7 @@ declare const fullApi: ApiFromModules<{
   prescriptions: typeof prescriptions;
   seed: typeof seed;
   triage: typeof triage;
+  triageAction: typeof triageAction;
   users: typeof users;
   vitals: typeof vitals;
 }>;
