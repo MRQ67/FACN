@@ -141,7 +141,7 @@ export default function LandingPage() {
                 <div className="flex flex-col sm:flex-row gap-6 pt-6">
                   <button
                     onClick={() =>
-                      router.push(isSignedIn ? "/dashboard" : "/sign-in")
+                      router.push("/dashboard")
                     }
                     className="px-12 py-5 bg-zinc-800 dark:bg-zinc-900 text-white font-black rounded-2xl text-lg hover:bg-zinc-900 dark:hover:bg-black transition-all flex items-center gap-4 group shadow-xl"
                   >
@@ -162,7 +162,7 @@ export default function LandingPage() {
                   </button>
                   <button
                     onClick={() =>
-                      router.push(isSignedIn ? "/dashboard" : "/sign-in")
+                      router.push("/dashboard")
                     }
                     className="px-12 py-5 bg-surface text-heading border-2 border-border font-black rounded-2xl text-lg hover:border-brand-primary hover:text-brand-primary transition-all shadow-md"
                   >

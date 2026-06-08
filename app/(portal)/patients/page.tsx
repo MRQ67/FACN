@@ -79,8 +79,8 @@ export default function PatientRegistryPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {patients.map((p) => (
                             <div 
-                                key={p.id} 
-                                onClick={() => router.push(`/patients/${p.id}`)}
+                                key={p.patient._id} 
+                                onClick={() => router.push(`/patients/${p.patient._id}`)}
                                 className="bg-surface p-8 rounded-[2.5rem] border border-border hover:border-brand-primary/20 transition-all hover:shadow-2xl hover:shadow-brand-primary/5 cursor-pointer group"
                             >
                                 <div className="flex items-center gap-4 mb-6">
@@ -96,18 +96,18 @@ export default function PatientRegistryPage() {
                                 <div className="space-y-3 mb-6">
                                     <div className="flex justify-between text-xs font-bold">
                                         <span className="text-muted uppercase tracking-widest">Blood Type</span>
-                                        <span className="text-heading">{p.bloodType || 'Unknown'}</span>
+                                        <span className="text-heading">{p.patient.bloodType || 'Unknown'}</span>
                                     </div>
                                     <div className="flex justify-between text-xs font-bold">
                                         <span className="text-muted uppercase tracking-widest">Date of Birth</span>
-                                        <span className="text-heading">{new Date(p.dateOfBirth).toLocaleDateString()}</span>
+                                        <span className="text-heading">{new Date(p.patient.dateOfBirth).toLocaleDateString()}</span>
                                     </div>
                                 </div>
 
-                                {p.chronicConditions && (
+                                {p.patient.chronicConditions && (
                                     <div className="p-3 bg-brand-secondary/10 rounded-xl mb-6">
                                         <p className="text-[10px] font-black text-brand-secondary uppercase tracking-widest mb-1">Chronic Conditions</p>
-                                        <p className="text-xs font-bold text-brand-secondary truncate">{p.chronicConditions}</p>
+                                        <p className="text-xs font-bold text-brand-secondary truncate">{p.patient.chronicConditions}</p>
                                     </div>
                                 )}
 

@@ -133,12 +133,26 @@ export const toggleAvailability = mutation({
     if (!user) throw new ConvexError("User not found");
     if (user.role !== "DOCTOR") throw new ConvexError("Not a doctor");
 
-    const doctor = await ctx.db
+    let doctor = await ctx.db
       .query("doctors")
       .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .unique();
 
-    if (!doctor) throw new ConvexError("Doctor profile not found");
+    if (!doctor) {
+      // Create a default doctor profile if it doesn't exist
+      // We'll use the first hospital found as a default for now
+      const hospital = await ctx.db.query("hospitals").first();
+      if (!hospital) throw new ConvexError("No hospitals found in system");
+
+      const doctorId = await ctx.db.insert("doctors", {
+        userId: user._id,
+        specialty: "General Medicine",
+        hospitalId: hospital._id,
+        licenseNumber: "PENDING",
+        isAvailable: true,
+      });
+      return { _id: doctorId, isAvailable: true };
+    }
 
     await ctx.db.patch(doctor._id, {
       isAvailable: !doctor.isAvailable,

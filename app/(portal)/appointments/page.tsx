@@ -6,6 +6,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PatientBookAction } from "@/components/patient-book-action";
 
 export default function AppointmentsPage() {
   const { user } = useUser();
@@ -60,12 +61,15 @@ export default function AppointmentsPage() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-foreground">My Appointments</h1>
           {profile?.role === "PATIENT" && (
-            <button
-              onClick={() => router.push("/doctors")}
-              className="px-4 py-2 bg-primary text-primary-foreground font-bold rounded-md hover:bg-opacity-90"
-            >
-              Book New Appointment
-            </button>
+            <PatientBookAction 
+              trigger={
+                <button
+                  className="px-6 py-2.5 bg-brand-primary text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-opacity-90 shadow-lg shadow-brand-primary/20 transition-all"
+                >
+                  Book New Appointment
+                </button>
+              }
+            />
           )}
         </div>
 
